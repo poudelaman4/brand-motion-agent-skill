@@ -32,6 +32,7 @@ This is a reusable **agent skill package**, not a replacement for a video editor
 - Create a motion brief, frame-accurate manifest, reduced-motion state, and QA plan.
 - Produce renderer-neutral handoffs or implement a supported renderer when one is available.
 - Inspect encoded frames, build exact checkpoint sheets, and compare final states with documented tolerances.
+- Validate extracted raster transitions at direct start/mid/end stills and in decoded output before delivery.
 
 Generative video is never allowed to silently redraw an approved logo. When a flattened source does not contain semantic layers, the skill reports the limitation and offers a grouped or whole-mark fallback instead of inventing hidden pixels.
 
@@ -374,6 +375,14 @@ python3 "${SKILL_DIR}/scripts/compare_final_frame.py" \
 
 Use `--allow-opaque` only when an opaque white or brand-background render is intentionally being compared to a transparent reference. Use `--require-alpha` when the deliverable must contain a real alpha channel.
 
+For an opacity crossfade between an extracted raster layer and vector or whole-mark geometry, render direct stills at the start, midpoint, and end, then decode the same frames from the encoded file. A clean final frame and a clean contact sheet do not prove that the transition is clean.
+
+```bash
+npx remotion still MyLogoComposition ./qa/frame-24.png --frame=24
+ffmpeg -y -v error -i ./renders/my-logo.mp4 \
+  -vf "select=eq(n\\,24)" -vsync 0 -frames:v 1 ./qa/decoded-frame-24.png
+```
+
 ## Source-capability and brand-safety rules
 
 The skill's central guardrail is source honesty:
@@ -436,6 +445,7 @@ To update the skill safely:
 The development evaluation set covers:
 
 - flattened raster with unsafe independent-motion requests
+- flattened raster transition ghosts and direct-frame QA
 - layered vector education/LMS planning
 - invalid manifest repair
 - alpha, reduced-motion, aspect-ratio, and final-state requirements

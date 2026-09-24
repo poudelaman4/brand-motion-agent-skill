@@ -3,7 +3,7 @@ name: animation-logo-skill
 description: Create, storyboard, render, or QA motion for an approved logo, monogram, lettermark, wordmark, emblem, or brand mark while preserving canonical geometry and the final lockup. Use for logo reveals, intros, stingers, loops, interactive states, motion briefs/manifests, and SVG, Lottie/dotLottie, Remotion, transparent/white/dark video, poster delivery, or QA. Trigger on requests to animate a logo/mark or review an existing logo animation; do not use for static logo redesign, font/glyph extraction, generic motion graphics, product animation, or format-only video conversion.
 compatibility: Designed for filesystem-enabled agents. Optional Python, Pillow, NumPy, SciPy, FFmpeg, and a renderer such as Remotion may be used when available; unavailable renderers stop at the renderer-neutral brief/manifest and mark rendering blocked.
 metadata:
-  version: "1.1"
+  version: "1.2"
   category: motion-design
 ---
 
@@ -31,6 +31,7 @@ If the user does not name a mode, infer it from the requested deliverables. Ask 
 - Treat the final state as a golden state. Verify canonical geometry, text metrics, color, alpha, and clear space against the reference; use documented tolerances for encoded RGB output.
 - For Remotion or other rendered video, drive every value from the frame number. Explicit state machines are allowed for interactive SVG/dotLottie runtimes.
 - Never silently fabricate hidden detail when a flattened source does not contain separable layers. Offer a grouped or whole-mark fallback and state the limitation.
+- Treat raster layers extracted from a flattened source as provisional reconstruction assets. A clean-looking layer can still carry low-alpha ringing or crop contamination that becomes visible during an opacity crossfade; prefer approved vector geometry for continuous rings and contours.
 - One canonical motion specification and timing model may feed separate square, vertical, horizontal, alpha, white, dark, and interactive compositions. Do not regenerate each variant from scratch.
 
 ## Source capability gate
@@ -50,9 +51,9 @@ Before promising independent animation, determine whether the source is vector, 
 4. **Choose a concept:** select one primary pattern from the matching reference. Keep the wordmark subordinate until the mark is readable unless text is the hero.
 5. **Write the brief:** fill `assets/motion-brief-template.json`; keep the executable manifest in `assets/motion-manifest-template.json`.
 6. **Storyboard:** define the opening state, two to four milestones, settle frame, final hold, reduced-motion state, and acceptance checks before coding.
-7. **Build:** use approved source geometry. Extract or request layers once, store tight crops with bounds, and animate transforms/opacity around semantic pivots. Do not segment per frame.
+7. **Build:** use approved source geometry. Extract or request layers once, store tight crops with bounds, and animate transforms/opacity around semantic pivots. Do not segment per frame. For any extracted raster crossfade, inspect the layer alone and render the exact transition midpoint before accepting it.
 8. **Render variants:** derive outputs from the canonical spec using separate compositions or state definitions as needed.
-9. **QA:** render exact checkpoint frames, inspect the decoded video, compare the final state to the reference, and test target players/backgrounds. Read `references/qa/qa-checklist.md`.
+9. **QA:** render exact checkpoint frames, inspect the decoded video, compare the final state to the reference, and test target players/backgrounds. For opacity crossfades, inspect direct start/mid/end stills and decode the same frames from the final file. Read `references/qa/qa-checklist.md`.
 10. **Package:** deliver the source, final motion, static poster, required variants, manifest, render commands, and a pass/warn/blocked report.
 
 ## Hard blockers and provisional defaults
@@ -125,6 +126,7 @@ For `produce` mode, return or save:
 - A master animation and requested background/codec variants.
 - A static poster/end frame.
 - Exact checkpoint contact sheet, stream metadata, and final-state comparison notes.
+- Direct transition stills for raster opacity crossfades, plus decoded transition-frame evidence when a crossfade is used.
 - Known limitations, inferred decisions, licensing notes, and reproduction commands.
 
 For `plan` or `audit` mode, stop before rendering and return only the requested plan/report. For `interactive` mode, include state definitions, triggers, focus/keyboard behavior, and a static/reduced branch.

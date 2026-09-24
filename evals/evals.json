@@ -52,6 +52,18 @@
         "The response requires a static hold and canonical final transform for final-state layers.",
         "The response distinguishes exact canonical geometry from codec-tolerant RGB comparison."
       ]
+    },
+    {
+      "id": 5,
+      "prompt": "A flattened logo PNG was reconstructed into a raster ring and crossfaded with clean vector geometry. The final frame looks correct, but a pale duplicate ring or matte fragment appears around the crossfade midpoint. Diagnose the failure and specify the repair and QA evidence before delivery.",
+      "expected_output": "The agent treats the extracted raster layer as provisional, identifies low-alpha ringing or crop contamination as a likely cause, prefers approved vector or whole-mark geometry, and requires direct start/mid/end stills plus decoded transition-frame checks.",
+      "files": ["evals/files/flattened-logo.png"],
+      "assertions": [
+        "The response does not assume a clean final frame proves the transition is clean.",
+        "The response inspects the extracted layer alone and in the complete composition over multiple backgrounds.",
+        "The response requires direct start/mid/end transition stills and decoded encoded-frame evidence.",
+        "The response prefers a clean vector or whole-mark fallback over hiding a ghost with blur, glow, or opacity."
+      ]
     }
   ]
 }

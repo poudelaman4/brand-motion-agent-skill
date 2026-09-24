@@ -28,6 +28,8 @@
 - [ ] Pivots use semantic anchors, not arbitrary box centers.
 - [ ] Crops are inspected over white, black, checkerboard, and a saturated color.
 - [ ] No accidental matte, halo, hidden background, doubled shadow, or missing overlap is visible.
+- [ ] Extracted raster layers are treated as provisional reconstruction assets; residual pixels, low-alpha components, and crop contamination are checked before motion.
+- [ ] Every opacity crossfade between two representations has direct start/mid/end stills; rings and continuous outlines are checked for ghost contours.
 - [ ] Tight crops are used for high-resolution transparent layers.
 - [ ] Flattened-source reconstructions, if any, have fresh approval.
 
@@ -37,6 +39,7 @@
 - [ ] No collisions, clipping, tangencies, or late micro-adjustments occur.
 - [ ] Overshoot stays within the selected pattern limits.
 - [ ] Final state is fully settled and has no blur, glow, guide, or temporary scaffolding.
+- [ ] Transition frames are reviewed at 100% and thumbnail size; no pale duplicate contours, halos, or matte fragments appear during partial opacity.
 - [ ] The logo is recognizable at thumbnail size.
 - [ ] The wordmark does not compete with the primary mark unless intended.
 - [ ] Parallel timing feels intentional rather than queued.
@@ -55,6 +58,7 @@
 - [ ] Master and requested variants are encoded.
 - [ ] Stream metadata is checked for frame count, fps, duration, codec, pixel format, color range/profile, and alpha mode.
 - [ ] Decoded checkpoint and poster frames are inspected.
+- [ ] Exact crossfade transition frames are decoded from the final encoded file, not only rendered as composition stills.
 - [ ] Target player/editor plays the file without load flicker or missing assets.
 - [ ] Alpha, white, dark, and opaque variants are separate and intentional.
 - [ ] Poster/end frame and reduced-motion asset are supplied.

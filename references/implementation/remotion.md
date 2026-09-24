@@ -8,6 +8,7 @@
 - Layer timing
 - Renders
 - Performance
+- Transition-frame QA
 - Example pattern
 
 ## Frame-driven architecture
@@ -59,6 +60,10 @@ npx remotion render CompositionId output.mp4 --concurrency=2 --codec=h264 --crf=
 ```
 
 Use `--codec` and output options appropriate to the target. Validate with `ffprobe` and decode exact checkpoint/final frames. Keep square, vertical, alpha, white, and dark outputs as separate compositions driven by one canonical timing model.
+
+## Transition-frame QA
+
+For every opacity crossfade, render direct stills at the start, midpoint, and end, plus the frame immediately before and after the transition. Inspect the layer alone and in the complete composition at actual delivery scale. Then decode those same frame indices from the final encoded file. A direct still isolates composition-layer artifacts; a decoded frame checks codec, color, alpha, and player-delivery effects. A clean poster frame does not clear a transition.
 
 ## Performance
 

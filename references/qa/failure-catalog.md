@@ -25,6 +25,12 @@
 **Symptom:** white/black fringe appears after moving a layer.
 **Repair:** inspect alpha, clean edges, and composite over multiple backgrounds.
 
+### Noisy raster crossfade ghost
+
+**Symptom:** a pale duplicate contour, broken ring, or matte fragment appears only while an extracted layer is partially transparent.
+**Cause:** low-alpha ringing, residual pixels, crop contamination, or an already-upscaled raster layer is being crossfaded with cleaner vector or whole-mark geometry.
+**Repair:** prefer approved vector geometry; otherwise rebuild from original-resolution pixels, prune residual components, inspect multiple backgrounds, render direct start/mid/end stills, decode the encoded transition frames, and fall back to the clean vector or whole-mark reveal instead of hiding the ghost with effects.
+
 ## Motion failures
 
 ### Detached pivot

@@ -5,6 +5,7 @@
 - Capability decision
 - Safe inspection
 - Grouping and reconstruction
+- Crossfade safety
 - Alpha and resolution
 - Fallback patterns
 - Approval requirements
@@ -27,6 +28,16 @@ Before promising independent animation, record:
 `python scripts/inspect_logo_assets.py logo.png` reports alpha bounds and connected components. Connected components can be split by antialiasing, shadows, gradients, or touching pixels; they are evidence for manual review, not semantic layers.
 
 Inspect each candidate layer alone and in the complete composite. A layer extracted from a composite may contain blended edge pixels or no hidden detail behind an overlap.
+
+## Crossfade safety
+
+An extracted ring, outline, or contour is not safe to crossfade merely because its crop looks clean at 100%. Low-alpha pixels from a matte, radial mask, upscaling, or neighboring layers can become a visible ghost when opacity is between 0 and 1.
+
+- Prefer an approved vector contour or measured geometry for continuous rings and outlines.
+- If a raster layer is necessary, create its mask from original-resolution pixels rather than an already-upscaled composite, prune residual low-alpha components, and inspect the crop on white, black, checkerboard, and saturated backgrounds.
+- Render direct composition stills at the crossfade start, midpoint, and end, with the layer alone and in the full stack.
+- Decode the same frames from the encoded output. A clean final frame does not validate a transition, and codec artifacts alone are not a sufficient diagnosis.
+- If a ghost remains, remove the crossfade or use a clean vector/whole-mark fallback; do not hide it with blur, glow, or opacity alone.
 
 ## Grouping and reconstruction
 
