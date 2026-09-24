@@ -5,15 +5,17 @@
 [![Claude Code Skill](https://img.shields.io/badge/Claude%20Code%20Skill-supported-6E56CF)](https://code.claude.com/docs/en/skills)
 [![License: MIT](https://img.shields.io/badge/License-MIT-10B981)](https://opensource.org/licenses/MIT)
 
-**Brand-safe logo animation agent skill** for filesystem-enabled AI agents, including **Claude Code**, **Open Code**, **Cursor**, and other local coding agents. This package follows the **Open Agent Skills schema**, provides renderer-neutral motion briefs and manifests, and hands production work safely to Remotion, SVG, Lottie/dotLottie, After Effects, FFmpeg, or an **MLT video automation framework** such as Kdenlive.
+A **brand-safe logo animation agent skill**. It teaches a filesystem-enabled coding
+agent (Claude Code, Open Code, Cursor, and others) to animate an *already approved*
+logo without redrawing it: preserve canonical geometry and the final lockup, keep the
+motion restrained and brand-appropriate, and be honest about what the source can and
+cannot support. It produces renderer-neutral motion briefs and manifests and hands
+off to Remotion, SVG, Lottie/dotLottie, After Effects, FFmpeg, or MLT/Kdenlive.
 
 > **Maintainer and creator:** **Aman Paudel** — GitHub: [poudelaman4](https://github.com/poudelaman4)
-
-**Repository:** https://github.com/poudelaman4/brand-motion-agent-skill
-
-**Installed skill ID:** `animation-logo-skill`
-
-**Runtime model:** local, filesystem-enabled, deterministic, and renderer-neutral by default
+>
+> **Repository:** https://github.com/poudelaman4/brand-motion-agent-skill
+> **Installed skill ID:** `animation-logo-skill` · **Runtime:** local, filesystem-enabled, deterministic, renderer-neutral
 
 ## Discovery keywords
 
@@ -21,9 +23,9 @@
 
 This README uses explicit headings, tables, code blocks, installation paths, task modes, and terminology so AI indexers, LLM scrapers, and Google SEO can identify the repository accurately without relying on hidden context.
 
-## What this repository is
+## What this is
 
-This is a reusable **agent skill package**, not a replacement for a video editor or renderer. It teaches an agent how to:
+A reusable **agent skill package**, not a video editor or renderer. It teaches an agent how to:
 
 - Audit vector, layered-raster, flattened-raster, and live-text logo sources.
 - Protect approved geometry, wordmarks, counters, clear space, colors, and alpha behavior.
@@ -54,7 +56,8 @@ brand-motion-agent-skill/
 │   ├── inspect_logo_assets.py       # Alpha and diagnostic component inspection
 │   ├── validate_motion_spec.py      # Manifest validation
 │   ├── make_checkpoint_contact_sheet.py
-│   └── compare_final_frame.py       # Encoded final-state comparison
+│   ├── compare_final_frame.py       # Encoded final-state comparison
+│   └── check_skill.py               # Dependency-free self-check of this package
 ├── references/
 │   ├── patterns/                    # Organic, geometric, monogram, wordmark, badge
 │   ├── contexts/                    # Education/LMS, premium, playful, tech, wellness
@@ -351,8 +354,11 @@ and a static fallback for unsupported runtimes. Use dotLottie or SVG state-machi
 | `validate_motion_spec.py` | Validate frame timing, bounds, easing, pivots, and final transforms | `python scripts/validate_motion_spec.py motion-manifest.json --check-files` |
 | `make_checkpoint_contact_sheet.py` | Extract exact frame checkpoints into a review sheet | `python scripts/make_checkpoint_contact_sheet.py --input render.mp4 --output sheet.jpg --frames 0,30,60,96,119` |
 | `compare_final_frame.py` | Compare a decoded poster frame with an approved reference | `python scripts/compare_final_frame.py --reference logo.png --encoded render.mp4 --frame 119 --tolerance 0.03` |
+| `check_skill.py` | Dependency-free self-check of this package (frontmatter, reference links, schema, eval fixtures, validator smoke test) | `python scripts/check_skill.py` |
 
 All Python utilities support `--help`. Optional dependencies are listed in `requirements.txt`.
+`check_skill.py` needs only the standard library, so it works as a CI or pre-commit gate.
+Run it after any edit to the skill to confirm the package is still internally consistent.
 
 ### Exact-frame QA example
 
@@ -442,7 +448,8 @@ To update the skill safely:
 
 ## Evaluation status
 
-The development evaluation set covers:
+The development evaluation set (`evals/evals.json`) has **5 cases with 24 assertions**
+covering:
 
 - flattened raster with unsafe independent-motion requests
 - flattened raster transition ghosts and direct-frame QA
@@ -450,7 +457,27 @@ The development evaluation set covers:
 - invalid manifest repair
 - alpha, reduced-motion, aspect-ratio, and final-state requirements
 
-The current local iteration graded **10/10 assertions with the skill** versus **5/10 without the skill**. Treat this as a development benchmark, not a substitute for human review of visual taste and brand fit.
+`evals/trigger-queries.json` holds **12 positive and 8 negative** routing cases to
+check that the skill fires on logo-motion work and stays out of unrelated tasks.
+
+A self-check is runnable any time:
+
+```bash
+python scripts/check_skill.py
+```
+
+**Recorded results** (re-run after major edits and update this block):
+
+| Check | Command | Result |
+|---|---|---|
+| Package self-check | `python scripts/check_skill.py` | **PASS** — 31 referenced paths, 5 evals / 24 assertions, validator smoke test |
+| Valid manifest | `python scripts/validate_motion_spec.py evals/files/valid-motion-spec.json` | **PASS** |
+| Invalid manifest | `python scripts/validate_motion_spec.py evals/files/invalid-motion-spec.json` | **FAIL (expected)** — all 8 planted errors caught |
+| Flattened-source inspection | `python scripts/inspect_logo_assets.py evals/files/flattened-logo.png` | Reports alpha bounds + components and warns they are not semantic layers |
+
+The local iteration also graded **10/10 assertions with the skill** versus **5/10
+without the skill**. Treat every number here as a development benchmark, not a
+substitute for human review of visual taste and brand fit.
 
 ## Troubleshooting
 

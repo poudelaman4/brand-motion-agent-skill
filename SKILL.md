@@ -115,6 +115,7 @@ Run commands from the skill root or use absolute paths. Python utilities require
 - `python scripts/validate_motion_spec.py path/to/motion-spec.json` validates the manifest contract.
 - `python scripts/make_checkpoint_contact_sheet.py --input video.mp4 --output contact-sheet.jpg --frames 0,30,60,96,119` creates a frame-accurate review sheet.
 - `python scripts/compare_final_frame.py --reference reference.png --encoded video.mp4 --frame 119 --tolerance 0.03` performs a documented final-state check; add `--allow-opaque` only when an opaque white/brand render is intentionally being compared to a transparent reference.
+- `python scripts/check_skill.py` is a dependency-free self-check of this package (frontmatter, reference links, schema, eval fixtures, and a validator smoke test); run it after editing the skill.
 
 ## Output contract
 
