@@ -1,0 +1,117 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://example.invalid/animation-logo-skill/motion-spec.schema.json",
+  "title": "Animation Logo Motion Manifest",
+  "type": "object",
+  "required": [
+    "name",
+    "fps",
+    "duration_frames",
+    "canvas",
+    "source_reference",
+    "primary_concept",
+    "settle_frame",
+    "hold_start_frame",
+    "reduced_motion",
+    "background_variants",
+    "poster_frame",
+    "layers"
+  ],
+  "properties": {
+    "name": {"type": "string", "minLength": 1},
+    "fps": {"type": "number", "exclusiveMinimum": 0},
+    "duration_frames": {"type": "integer", "minimum": 1},
+    "canvas": {"$ref": "#/$defs/canvas"},
+    "source_reference": {"type": "string", "minLength": 1},
+    "source_checksum": {"type": "string"},
+    "source_profile": {"type": "string"},
+    "primary_concept": {"type": "string", "minLength": 1},
+    "settle_frame": {"type": "integer", "minimum": 0},
+    "hold_start_frame": {"type": "integer", "minimum": 0},
+    "reduced_motion": {"type": "string", "minLength": 1},
+    "background_variants": {"type": "array", "minItems": 1, "items": {"type": "string", "minLength": 1}},
+    "poster_frame": {"type": "integer", "minimum": 0},
+    "target_player": {"type": "string"},
+    "renderer": {"type": "string"},
+    "outputs": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["id", "canvas", "background", "path"],
+        "properties": {
+          "id": {"type": "string", "minLength": 1},
+          "canvas": {"$ref": "#/$defs/canvas"},
+          "background": {"type": "string", "minLength": 1},
+          "path": {"type": "string", "minLength": 1},
+          "codec": {"type": "string"}
+        },
+        "additionalProperties": false
+      }
+    },
+    "layers": {
+      "type": "array",
+      "minItems": 1,
+      "items": {"$ref": "#/$defs/layer"}
+    }
+  },
+  "$defs": {
+    "canvas": {
+      "type": "object",
+      "required": ["width", "height"],
+      "properties": {
+        "width": {"type": "integer", "minimum": 1},
+        "height": {"type": "integer", "minimum": 1}
+      },
+      "additionalProperties": false
+    },
+    "transform": {
+      "type": "object",
+      "required": ["x", "y", "scale", "rotation", "opacity"],
+      "properties": {
+        "x": {"type": "number"},
+        "y": {"type": "number"},
+        "scale": {"type": "number", "exclusiveMinimum": 0},
+        "rotation": {"type": "number"},
+        "opacity": {"type": "number", "minimum": 0, "maximum": 1}
+      },
+      "additionalProperties": false
+    },
+    "layer": {
+      "type": "object",
+      "required": [
+        "id",
+        "role",
+        "source",
+        "bounds",
+        "pivot",
+        "z_index",
+        "start_frame",
+        "duration_frames",
+        "from",
+        "to",
+        "easing",
+        "confidence",
+        "locked",
+        "final_state"
+      ],
+      "properties": {
+        "id": {"type": "string", "minLength": 1},
+        "role": {"type": "string", "minLength": 1},
+        "source": {"type": "string", "minLength": 1},
+        "bounds": {"type": "array", "minItems": 4, "maxItems": 4, "items": {"type": "number", "minimum": 0, "maximum": 1}},
+        "pivot": {"type": "array", "minItems": 2, "maxItems": 2, "items": {"type": "number", "minimum": 0, "maximum": 1}},
+        "z_index": {"type": "integer"},
+        "start_frame": {"type": "integer", "minimum": 0},
+        "duration_frames": {"type": "integer", "minimum": 1},
+        "from": {"$ref": "#/$defs/transform"},
+        "to": {"$ref": "#/$defs/transform"},
+        "easing": {"enum": ["settle", "enter", "draw", "organic", "snap", "play", "path-linear"]},
+        "confidence": {"enum": ["observed", "inferred", "provisional", "blocked"]},
+        "locked": {"type": "boolean"},
+        "final_state": {"type": "boolean"}
+      },
+      "additionalProperties": false
+    }
+  },
+  "additionalProperties": false
+}

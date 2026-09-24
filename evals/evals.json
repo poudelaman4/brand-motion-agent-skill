@@ -1,0 +1,57 @@
+{
+  "skill_name": "animation-logo-skill",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "Use the synthetic flattened logo fixture at evals/files/flattened-logo.png. Make a tasteful 4-second white-background animation: the emblem should establish first, the wordmark should enter while the emblem is still readable, and the final state must match the source. I also need a checkpoint sheet and a high-resolution output plan. Do not pretend the flattened file contains independent letters or leaves.",
+      "expected_output": "The agent identifies the flattened-source limitation, requests or records approved groups, creates a renderer-neutral brief/manifest with 120 frames at 30 fps by default, uses a whole-mark or approved-group fallback, and specifies final-state/QA checks.",
+      "files": ["evals/files/flattened-logo.png"],
+      "assertions": [
+        "The response explicitly classifies the source as flattened or otherwise non-semantic.",
+        "The response does not claim that connected components are guaranteed independent logo layers.",
+        "The response records 120 frames at 30 fps when using the four-second default.",
+        "The response includes a final hold, reduced-motion behavior, and a final-state acceptance check.",
+        "The response requests a checkpoint/contact sheet and documents the flattened-source limitation."
+      ]
+    },
+    {
+      "id": 2,
+      "prompt": "Use the layered fixture at evals/files/layered-mark.svg for our education startup. We need a clean geometric/botanical reveal for a website and a 9:16 social version, without generic neon AI effects. The mark should assemble or unfold into the approved lockup. Explain what source layers, pivots, timing, and delivery variants you need before rendering.",
+      "expected_output": "The agent classifies the vector/layered source, selects one restrained primary pattern, names the required semantic layers and pivots, proposes separate square and vertical compositions from one timing model, and avoids inventing geometry or effects.",
+      "files": ["evals/files/layered-mark.svg"],
+      "assertions": [
+        "The response identifies the SVG as vector/layered source rather than a flattened raster.",
+        "The response selects one primary motion pattern and no more than two supporting gestures.",
+        "The response requests or records semantic pivots, z-order, and exact text outlines.",
+        "The response includes square and 9:16 output planning with separate canvases.",
+        "The response excludes generic neon/AI effects unless justified by the brand."
+      ]
+    },
+    {
+      "id": 3,
+      "prompt": "We only have a flattened logo PNG and need a transparent looping animation for a product header. Can you make the letters and a ring animate independently, and deliver a dotLottie or WebM? Include reduced-motion behavior and tell me what is impossible from the flattened source.",
+      "expected_output": "The agent separates alpha/white/opaque delivery, explains that independent motion and hidden pixels are blocked without layers, proposes a grouped or whole-mark fallback, defines loop-boundary and reduced-motion checks, and avoids promising a dotLottie/WebM before the source and runtime are confirmed.",
+      "files": ["evals/files/flattened-logo.png"],
+      "assertions": [
+        "The response distinguishes transparent, white, and opaque outputs.",
+        "The response marks independent letters/ring motion as blocked or provisional from a flattened source.",
+        "The response requests vector/layered source or an approved reconstruction.",
+        "The response includes loop first/last-state and reduced-motion requirements.",
+        "The response does not silently fabricate hidden detail or claim that a runtime format is universally supported."
+      ]
+    },
+    {
+      "id": 4,
+      "prompt": "Review the motion manifest at evals/files/invalid-motion-spec.json. Identify why it should not render, then produce a corrected manifest using the supplied layered fixture and explain the final-state acceptance criteria.",
+      "expected_output": "The agent runs or applies the manifest validator, catches frame ordering, bounds, easing, scale, and noncanonical-final-transform errors, repairs the manifest, and explains encoded-output tolerance separately from canonical geometry.",
+      "files": ["evals/files/invalid-motion-spec.json", "evals/files/layered-mark.svg"],
+      "assertions": [
+        "The response identifies the invalid frame ordering and invalid bounds.",
+        "The response identifies the unsupported easing token and nonpositive scale.",
+        "The corrected manifest passes the bundled validator.",
+        "The response requires a static hold and canonical final transform for final-state layers.",
+        "The response distinguishes exact canonical geometry from codec-tolerant RGB comparison."
+      ]
+    }
+  ]
+}

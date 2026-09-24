@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <g id="emblem" fill="#0066cc">
+    <path id="seed" d="M256 96c34 42 48 80 48 116 0 42-22 75-48 98-26-23-48-56-48-98 0-36 14-74 48-116Z"/>
+    <path id="leaf-left" d="M236 300C166 286 112 246 92 188c78-6 134 22 160 76 8 18 4 30-16 36Z"/>
+    <path id="leaf-right" d="M276 300c70-14 124-54 144-112-78-6-134 22-160 76-8 18-4 30 16 36Z"/>
+  </g>
+  <text id="wordmark" x="256" y="420" text-anchor="middle" font-family="Arial, sans-serif" font-size="32" fill="#0066cc">TEST LMS</text>
+</svg>

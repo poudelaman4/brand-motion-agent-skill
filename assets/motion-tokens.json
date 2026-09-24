@@ -1,0 +1,33 @@
+{
+  "duration": {
+    "one_shot_seconds": [1.2, 4.0],
+    "intro_hold_ms": [500, 1000],
+    "ui_transition_ms": [90, 180],
+    "loop_seconds": [3.0, 8.0]
+  },
+  "easing": {
+    "settle": [0.2, 0.0, 0.0, 1.0],
+    "enter": [0.0, 0.0, 0.2, 1.0],
+    "draw": [0.45, 0.0, 0.55, 1.0],
+    "organic": [0.34, 1.15, 0.64, 1.0],
+    "snap": [0.85, 0.0, 0.15, 1.0],
+    "play": [0.34, 1.15, 0.64, 1.0],
+    "path-linear": [0.0, 0.0, 1.0, 1.0]
+  },
+  "stagger": {
+    "meaningful_group_ms": [40, 80],
+    "dense_wordmark_ms": [20, 50]
+  },
+  "overshoot": {
+    "identity_critical": 0.0,
+    "organic_max": 0.05,
+    "playful_max": 0.08
+  },
+  "frame_defaults": {
+    "fps": 30,
+    "four_second_duration_frames": 120,
+    "settle_ratio": 0.8,
+    "poster_last_frame": true,
+    "half_open_intervals": true
+  }
+}

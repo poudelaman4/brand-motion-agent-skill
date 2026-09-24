@@ -1,0 +1,31 @@
+{
+  "name": "invalid-eval-motion",
+  "fps": 30,
+  "duration_frames": 30,
+  "canvas": {"width": 1080, "height": 1080},
+  "source_reference": "evals/files/flattened-logo.png",
+  "primary_concept": "ORG-01",
+  "settle_frame": 40,
+  "hold_start_frame": 20,
+  "poster_frame": 29,
+  "reduced_motion": "Show final state",
+  "background_variants": ["white"],
+  "layers": [
+    {
+      "id": "bad-layer",
+      "role": "core-symbol",
+      "source": "evals/files/flattened-logo.png",
+      "bounds": [0.8, 0.1, 0.2, 0.7],
+      "pivot": [0.5, 0.5],
+      "z_index": 1,
+      "start_frame": 0,
+      "duration_frames": 40,
+      "from": {"x": 0, "y": 0, "scale": 0, "rotation": 0, "opacity": 0},
+      "to": {"x": 1, "y": 1, "scale": 1, "rotation": 4, "opacity": 1},
+      "easing": "unknown",
+      "confidence": "observed",
+      "locked": false,
+      "final_state": true
+    }
+  ]
+}

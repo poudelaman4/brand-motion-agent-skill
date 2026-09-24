@@ -1,0 +1,55 @@
+{
+  "name": "example-logo-reveal",
+  "fps": 30,
+  "duration_frames": 120,
+  "canvas": {"width": 1080, "height": 1080},
+  "source_reference": "assets/approved-logo.png",
+  "source_checksum": "sha256:replace-me",
+  "source_profile": "sRGB",
+  "primary_concept": "ORG-01",
+  "settle_frame": 96,
+  "hold_start_frame": 96,
+  "poster_frame": 119,
+  "reduced_motion": "Show the approved final state immediately.",
+  "background_variants": ["alpha", "white", "brand"],
+  "outputs": [
+    {"id": "square-alpha", "canvas": {"width": 1080, "height": 1080}, "background": "alpha", "path": "renders/logo-alpha.mov"},
+    {"id": "square-white", "canvas": {"width": 1080, "height": 1080}, "background": "white", "path": "renders/logo-white.mp4"}
+  ],
+  "target_player": "web and desktop video",
+  "renderer": "Remotion",
+  "layers": [
+    {
+      "id": "b",
+      "role": "core-symbol",
+      "source": "layers/b.png",
+      "bounds": [0.410, 0.260, 0.614, 0.554],
+      "pivot": [0.511, 0.549],
+      "z_index": 4,
+      "start_frame": 0,
+      "duration_frames": 30,
+      "from": {"x": 0, "y": 0.024, "scale": 0.86, "rotation": 0, "opacity": 0},
+      "to": {"x": 0, "y": 0, "scale": 1, "rotation": 0, "opacity": 1},
+      "easing": "enter",
+      "confidence": "observed",
+      "locked": false,
+      "final_state": true
+    },
+    {
+      "id": "wordmark-b",
+      "role": "wordmark-letter",
+      "source": "layers/wordmark-b.png",
+      "bounds": [0.194, 0.688, 0.282, 0.763],
+      "pivot": [0.237, 0.763],
+      "z_index": 7,
+      "start_frame": 30,
+      "duration_frames": 22,
+      "from": {"x": -0.002, "y": 0.016, "scale": 0.86, "rotation": 0, "opacity": 0},
+      "to": {"x": 0, "y": 0, "scale": 1, "rotation": 0, "opacity": 1},
+      "easing": "enter",
+      "confidence": "observed",
+      "locked": false,
+      "final_state": true
+    }
+  ]
+}

@@ -1,0 +1,38 @@
+{
+  "brand_intent": "Growth, learning, and calm confidence.",
+  "approved_source": "assets/approved-logo.svg",
+  "source_capability": "vector",
+  "task_mode": "produce",
+  "primary_concept": "ORG-01",
+  "why_it_fits": "The mark's botanical structure can unfold from its roots while the wordmark resolves into a stable lockup.",
+  "opening_state": "Empty white artboard with the approved background treatment.",
+  "milestones": [
+    {"frame": 0, "description": "Core seed or monogram establishes."},
+    {"frame": 18, "description": "Outer groups begin their intended gesture."},
+    {"frame": 42, "description": "Wordmark becomes readable."},
+    {"frame": 96, "description": "Canonical final state is settled."}
+  ],
+  "settle_frame": 96,
+  "hold_start_frame": 96,
+  "layer_inventory": ["core", "outer-left", "outer-right", "wordmark", "descriptor"],
+  "canonical_invariants": [
+    "Approved path/shape geometry",
+    "Approved counters and kerning",
+    "Approved clear space",
+    "Approved brand color and alpha behavior"
+  ],
+  "background_variants": ["alpha", "white", "brand"],
+  "reduced_motion_state": "Show the approved final state immediately.",
+  "forbidden_effects": ["unapproved glow", "particles", "camera shake", "letter bounce"],
+  "acceptance_checks": [
+    {"id": "readability", "type": "visual", "status": "pending", "evidence": ""},
+    {"id": "geometry", "type": "canonical", "status": "pending", "evidence": ""},
+    {"id": "typography", "type": "canonical", "status": "pending", "evidence": ""},
+    {"id": "encoded-color", "type": "encoded-tolerance", "status": "pending", "tolerance": 0.03, "evidence": ""},
+    {"id": "reduced-motion", "type": "accessibility", "status": "pending", "evidence": ""}
+  ],
+  "approval_status": "provisional",
+  "decision_log": [
+    {"decision": "Start wordmark while outer groups are still moving", "status": "inferred", "reason": "Creates overlap and avoids a queued reveal."}
+  ]
+}
