@@ -122,6 +122,34 @@
         "The response separates the explode direction and depth channel from the transform channel in the manifest shape.",
         "The response refuses the depth or three-dimensional request explicitly rather than approximating it silently."
       ]
+    },
+    {
+      "id": 9,
+      "prompt": "Our structure analysis says separation and particles both fit this logo. The client is a law firm and the mark will sit in the footer of every page, so it will be seen constantly. Pick something and justify it in one sentence.",
+      "expected_output": "The agent applies the taste gate with a corporate register and a frequent frequency, drops the vetoed techniques rather than demoting them, applies the frequency-scaled duration and overshoot ceilings, notes the cliche risk on whatever remains, and delivers a one-sentence justification that names a referent.",
+      "files": [
+        "evals/files/layered-mark.svg"
+      ],
+      "assertions": [
+        "The response states the register and the frequency assumption explicitly rather than leaving them implicit.",
+        "A register-vetoed technique is removed rather than kept as a supporting gesture.",
+        "The response applies a duration ceiling consistent with a high-frequency corporate context rather than a four-second reveal.",
+        "Overshoot is zero in this context and the response says why.",
+        "The one-sentence justification names a physical, structural, historical, or semiotic referent rather than asserting that the result feels premium."
+      ]
+    },
+    {
+      "id": 10,
+      "prompt": "The client wants a punchy 2-second logo sting for social. The wordmark is eight characters long. Write the frame plan and tell me whether this actually works.",
+      "expected_output": "The agent applies the reading floor, shows that eight characters cannot be legible inside the requested duration, states which of the three options applies, and refuses the combination rather than producing a plan that cannot be read.",
+      "files": [],
+      "assertions": [
+        "The response computes or cites the reading floor for an eight-character wordmark rather than asserting a duration.",
+        "The response shows that the requested duration cannot meet that floor and says so plainly.",
+        "The response offers the documented alternatives: drop the wordmark, extend the duration, or record the wordmark as decorative.",
+        "The response does not meet the floor by slowing the mark's entrance or by reducing its time at full contrast.",
+        "The response records the conflict and its resolution in the brief rather than silently shipping an unreadable wordmark."
+      ]
     }
   ]
 }

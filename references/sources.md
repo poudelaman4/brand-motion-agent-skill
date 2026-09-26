@@ -97,6 +97,90 @@ Renderer APIs, plugin behavior, and their engine-specific bugs change between re
 
 These libraries and papers measure image and path properties; none of them judges whether a mark suits its brand. The version numbers in the URLs pin the documented API revision, not a version you are required to install.
 
+## Light, depth, material, and camera
+
+- SVG 1.1 Filters, second edition: https://www.w3.org/TR/SVG11/filters.html
+- Filter Effects Module Level 1: https://www.w3.org/TR/filter-effects-1/
+- SVG 1.2 Filters, adds feDropShadow: https://www.w3.org/TR/SVGFilter12/
+- MDN feDropShadow: https://developer.mozilla.org/en-US/docs/Web/SVG/Reference/Element/feDropShadow
+- MDN feDiffuseLighting: https://developer.mozilla.org/en-US/docs/Web/SVG/Reference/Element/feDiffuseLighting
+- MDN feSpecularLighting: https://developer.mozilla.org/en-US/docs/Web/SVG/Reference/Element/feSpecularLighting
+- MDN feDisplacementMap: https://developer.mozilla.org/en-US/docs/Web/SVG/Reference/Element/feDisplacementMap
+- MDN feMorphology: https://developer.mozilla.org/en-US/docs/Web/SVG/Reference/Element/feMorphology
+- MDN drop-shadow(): https://developer.mozilla.org/en-US/docs/Web/CSS/filter-function/drop-shadow
+- MDN mix-blend-mode: https://developer.mozilla.org/en-US/docs/Web/CSS/mix-blend-mode
+- MDN transform-style and 3D flattening: https://developer.mozilla.org/en-US/docs/Web/CSS/transform-style
+- MDN perspective: https://developer.mozilla.org/en-US/docs/Web/CSS/perspective
+- Material Design 3 elevation: https://m3.material.io/styles/elevation
+- Material Design 1 elevation shadows: https://m1.material.io/resources/shadows.html
+- Apple HIG, Materials: https://developer.apple.com/design/human-interface-guidelines/materials
+- Apple HIG, Spatial layout: https://developer.apple.com/design/human-interface-guidelines/spatial-layout/
+- Three-point lighting and key-to-fill ratios: https://www.3drender.com/light/3point.html
+- Motivated light, Pixar-style: https://www.mguphynn.com/blog/2019/4/4/three-point-lighting-why-does-it-matter
+- Atmospheric perspective: https://en.wikipedia.org/wiki/Atmospheric_perspective
+- Blender Principled BSDF, specular and roughness ranges: https://docs.blender.org/manual/en/5.2/render/shader_nodes/shader/principled.html
+- After Effects 3D layers, lights, and cameras: https://helpx.adobe.com/after-effects/desktop/work-with-layers/camera-layer/cameras-lights-points-interest.html
+- After Effects 3D layer material expressions: https://ae-expressions.docsforadobe.dev/layer/threed/
+- Premultiplied alpha, why division by zero loses colour: https://lists.w3.org/Archives/Public/www-svg/1999Jun/0000.html
+- Alpha video in browsers, stacked alpha and the yuva444p path: https://developer.chrome.com/blog/alpha-transparency-in-chrome-video
+- 8-bit banding in filter alpha transfer functions: https://bugzilla.mozilla.org/show_bug.cgi?id=930331
+- Lottie shape layer feature matrix: https://github.com/airbnb/lottie-web/wiki/Features
+- Lottie After Effects compatibility caveats: https://docs.lottiefiles.com/en/integrations/after-effects/09-lottie-compatibility
+
+## Pace, rhythm, and reading
+
+- Reading speed, Brysbaert 2019: https://doi.org/10.31234/osf.io/xynwg
+- Fixation durations and the perceptual span, IReST: https://iovs.arvojournals.org/article.aspx?articleid=2166061
+- Characters per word, Klosinski 2015: https://www.mdpi.com/1995-8692/8/1/3
+- Material Design 1 duration and easing: https://m1.material.io/motion/duration-easing.html
+- Material Design 3 easing and duration tokens: https://m3.material.io/styles/motion/easing-and-duration/tokens-specs
+- easings.net canonical curve values: https://easings.net
+- Brand motion choreography, pace versus tempo: https://brand.zalando.com/toolkits/corporate-branding/identity/motion/choreography/
+- Nielsen Norman Group, executing UX animations: https://www.nngroup.com/articles/animation-duration/
+- Nielsen Norman Group, animation for attention: https://www.nngroup.com/articles/animation-usability/
+- Nielsen Norman Group, response time limits: https://www.nngroup.com/articles/response-times-3-important-limits/
+
+## Brand register, taste, and restraint
+
+- Aaker, Dimensions of Brand Personality: https://journals.sagepub.com/doi/10.1177/002224379703400304
+- van Leeuwen, the semiotics of movement: https://journals.sagepub.com/doi/10.1177/2634979521992733
+- Animated logo direction and trajectory preference: https://doi.org/10.1016/j.jbusres.2016.06.003
+- GitHub Brand Toolkit, motion identity: https://brand.github.com/motion/principles
+- Dropbox Brand, motion: https://brand.dropbox.com/motion
+- Herman Miller Brand Standards, motion: https://brandstandards.hermanmiller.com/motion
+- Atlassian Design, motion foundations: https://atlassian.design/foundations/motion
+- Atlassian Design, applying motion: https://atlassian.design/foundations/motion/applying-motion
+- IBM Carbon, motion overview: https://carbondesignsystem.com/elements/motion/overview/
+- Emil Kowalski, You Don't Need Animations: https://emilkowal.ski/ui/you-dont-need-animations
+- Emil Kowalski, extracting taste into rules: https://emilkowal.ski/ui/agents-with-taste
+- Motion as the one dimension rules cannot judge: https://solodesign.cc/blog/ai-design-slop-the-tells/
+- Motion slop and the machine fingerprint: https://sailop.com/blog/motion-slop-fade-in-up-scroll-animation-2026
+- Motion in brand guidelines, published as values: https://www.vmv.studio/post/motion-brand-guidelines
+- Still frame before animation: https://brainy.ink/paper/logo-animation-guide
+- Trademark and brand distinctiveness in motion: https://www.bitlaw.com/source/tmep/1209-01.html
+
+## Delivery contexts and standards
+
+- SMPTE ST 2046-1, safe areas: https://pub.smpte.org/pub/st2046-1/st2046-1-2009.pdf
+- SMPTE RP 218, legacy CRT safe areas: https://pub.smpte.org/latest/rp218/rp0218-2009.pdf
+- EBU R95, 16:9 safe areas: https://tech.ebu.ch/files/live/sites/tech/files/shared/r/r095-2016_2.pdf
+- ITU-R BT.1848-1, wide-screen safe areas: https://www.itu.int/dms_pubrec/itu-r/rec/bt/R-REC-BT.1848-1-201510-I!!PDF-E.pdf
+- ATSC A/343, captions and subtitles: https://www.atsc.org/wp-content/uploads/2021/08/A343-2018-Captions-and-Subtitles-with-Amend-1-r1.pdf
+- FCC 47 CFR 73.1212, sponsorship identification: https://www.ecfr.gov/current/title-47/chapter-I/subchapter-C/part-73/subpart-H/section-73.1212
+- FCC 47 CFR 73.1201, station identification: https://www.ecfr.gov/current/title-47/chapter-I/subchapter-C/part-73/subpart-H/section-73.1201
+- Apple ProRes white paper, alpha exchange: https://www.apple.com/euro/final-cut-pro/f/generic/docs/Apple_ProRes_White_Paper.pdf
+- Warner Bros. Discovery Motion Toolkit: https://brand.wbd.com/motion
+- Apple HIG, App icons: https://developer.apple.com/design/human-interface-guidelines/app-icons
+- Apple HIG, Launching: https://developer.apple.com/design/human-interface-guidelines/launching
+- Apple HIG, Motion: https://developer.apple.com/design/human-interface-guidelines/motion
+- App Store Connect, reduced motion criteria: https://developer.apple.com/help/app-store-connect/manage-app-accessibility/reduced-motion-evaluation-criteria/
+- WCAG 2.2 Pause Stop Hide: https://www.w3.org/WAI/WCAG22/Understanding/pause-stop-hide.html
+- WCAG 2.2 Three Flashes: https://www.w3.org/WAI/WCAG22/Understanding/three-flashes.html
+- WCAG 2.2 Animation from Interactions: https://www.w3.org/WAI/WCAG22/Understanding/animation-from-interactions.html
+- MDN scroll-driven animations: https://developer.mozilla.org/docs/Web/CSS/Guides/Scroll-driven_animations
+- MDN web video codecs and alpha support: https://developer.mozilla.org/en-US/docs/Web/Media/Guides/Formats/Video_codecs
+- dotLottie format and bundling: https://docs.lottiefiles.com/en/format/dotlottie/why-dotlottie
+
 ## Source interpretation
 
 - Official skill specifications define format and progressive disclosure; they do not prescribe a particular animation style.

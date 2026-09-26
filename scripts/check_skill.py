@@ -201,6 +201,27 @@ def check_profiler() -> None:
         fail(f"profiler self-test failed: {result.stderr.strip() or result.stdout.strip()}")
     else:
         note("profiler self-test passes on the layered vector fixture.")
+    # The taste gate is a veto, not a preference, so it has to be exercised too.
+    gated = subprocess.run(
+        [sys.executable, str(script), str(fixture), "--register", "luxury",
+         "--frequency", "daily", "--json"],
+        capture_output=True, text=True)
+    if gated.returncode != 0:
+        fail(f"profiler taste gate failed: {gated.stderr.strip() or gated.stdout.strip()}")
+        return
+    try:
+        document = json.loads(gated.stdout)
+    except json.JSONDecodeError as exc:
+        fail(f"profiler taste gate did not emit valid JSON: {exc}")
+        return
+    taste = document.get("recommendation", {}).get("taste", {})
+    budget = taste.get("budget", {})
+    # luxury at daily frequency: 1.5 s ceiling scaled by 0.5, one gesture, zero overshoot.
+    if budget.get("duration_ceiling_s") != 0.75 or budget.get("gesture_ceiling") != 1 \
+            or budget.get("overshoot_ceiling") != 0.0:
+        fail(f"taste budget is wrong for luxury at daily frequency: {budget}")
+    else:
+        note("taste gate applies the register veto and the frequency-scaled budget.")
 
 
 def main() -> int:

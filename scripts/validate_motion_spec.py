@@ -48,11 +48,29 @@ LAYER_OPTIONAL = {
     "morph",
     "mask",
     "effects",
+    "lighting",
 }
 LAYER_KEYS = LAYER_REQUIRED | LAYER_OPTIONAL
 EASING = {"settle", "enter", "draw", "organic", "snap", "play", "path-linear", "morph"}
 CONFIDENCE = {"observed", "inferred", "provisional", "blocked"}
 DETECTION_CONFIDENCE = {"inferred", "provisional", "blocked"}
+REGISTERS = {"premium", "heritage", "technology", "playful", "wellness", "corporate",
+             "sport", "luxury", "friendly", "precision", "editorial"}
+FREQUENCIES = {"rare", "occasional", "daily", "frequent", "keyboard"}
+REGISTER_BUDGET_CEILINGS = {
+    "premium": (1.2, 1, 0.0), "heritage": (3.0, 1, 0.0), "technology": (1.0, 2, 0.02),
+    "playful": (2.0, 3, 0.15), "wellness": (3.0, 1, 0.05), "corporate": (1.0, 1, 0.0),
+    "sport": (0.8, 1, 0.03), "luxury": (1.5, 1, 0.0), "friendly": (2.0, 2, 0.10),
+    "precision": (0.6, 1, 0.0), "editorial": (2.5, 3, 0.03),
+}
+FREQUENCY_FACTORS = {
+    "rare": (1.0, 1.0, 1.0), "occasional": (0.8, 1.0, 1.0), "daily": (0.5, 1.0, 0.0),
+    "frequent": (0.25, 1.0, 0.0), "keyboard": (0.0, 0.0, 0.0),
+}
+SHADOW_SPECIES = {"none", "hard", "ambient", "contact", "cast", "directional"}
+LIGHTING_KEYS = {"shadow_species", "shadow_blur", "shadow_offset", "shadow_opacity",
+                 "shadow_color", "light_azimuth", "light_elevation",
+                 "specular_exponent", "catcher"}
 TECHNIQUES = {
     "line_draw_on", "multi_stroke_trace", "kinetic_typography", "mask_wipe",
     "mask_wipe_mark", "circular_sweep", "particle_dissolve", "morph_shape",
@@ -237,7 +255,7 @@ def validate_detection(value: object, errors: list[str]) -> None:
         errors.append(f"{prefix} must be an object.")
         return
     allowed = {"tool", "capability_rung", "complexity", "complexity_band", "confidence",
-               "primary", "supporting", "blocked", "notes"}
+               "primary", "supporting", "blocked", "notes", "register", "frequency", "taste"}
     unknown = sorted(set(value) - allowed)
     if unknown:
         errors.append(f"{prefix} contains invalid fields: {unknown}")
@@ -288,6 +306,112 @@ def validate_detection(value: object, errors: list[str]) -> None:
     if notes is not None and (not isinstance(notes, list)
                               or not all(isinstance(item, str) for item in notes)):
         errors.append(f"{prefix}.notes must be an array of strings.")
+    register = value.get("register")
+    frequency = value.get("frequency")
+    if register is not None and register not in REGISTERS:
+        errors.append(f"{prefix}.register must be one of {sorted(REGISTERS)}.")
+    if frequency is not None and frequency not in FREQUENCIES:
+        errors.append(f"{prefix}.frequency must be one of {sorted(FREQUENCIES)}.")
+    taste = value.get("taste")
+    if taste is not None:
+        validate_taste(taste, f"{prefix}.taste", errors, register, frequency)
+
+
+def validate_taste(value: object, prefix: str, errors: list[str],
+                   register: object, frequency: object) -> None:
+    if not isinstance(value, dict):
+        errors.append(f"{prefix} must be an object.")
+        return
+    unknown = sorted(set(value) - {"register", "frequency", "budget", "permitted",
+                                    "vetoed", "cliches", "notes"})
+    if unknown:
+        errors.append(f"{prefix} contains invalid fields: {unknown}")
+    missing = sorted({"register", "budget", "permitted", "vetoed"} - set(value))
+    if missing:
+        errors.append(f"{prefix} is missing required fields: {missing}")
+    for key in ("permitted", "vetoed", "cliches", "notes"):
+        item = value.get(key)
+        if item is not None and not isinstance(item, list):
+            errors.append(f"{prefix}.{key} must be an array.")
+    for index, entry in enumerate(value.get("vetoed") or []):
+        label = f"{prefix}.vetoed[{index}]"
+        if not isinstance(entry, dict):
+            errors.append(f"{label} must be an object.")
+            continue
+        if set(entry) - {"technique", "scenario_id", "score", "reason", "register"}:
+            errors.append(f"{label} contains invalid fields.")
+        if not isinstance(entry.get("technique"), str) or not entry["technique"].strip():
+            errors.append(f"{label}.technique must be a non-empty string.")
+        if not isinstance(entry.get("reason"), str) or not entry["reason"].strip():
+            errors.append(f"{label}.reason must be a non-empty string.")
+    budget = value.get("budget")
+    if budget is not None:
+        if not isinstance(budget, dict):
+            errors.append(f"{prefix}.budget must be an object.")
+        else:
+            if set(budget) != {"duration_ceiling_s", "gesture_ceiling", "overshoot_ceiling"}:
+                errors.append(f"{prefix}.budget must contain exactly duration_ceiling_s, "
+                              "gesture_ceiling, and overshoot_ceiling.")
+            else:
+                ceiling = budget["duration_ceiling_s"]
+                gestures = budget["gesture_ceiling"]
+                overshoot = budget["overshoot_ceiling"]
+                for key, item in (("duration_ceiling_s", ceiling), ("overshoot_ceiling", overshoot)):
+                    if not is_number(item) or item < 0:
+                        errors.append(f"{prefix}.budget.{key} must be a non-negative number.")
+                if not is_int(gestures) or gestures < 0:
+                    errors.append(f"{prefix}.budget.gesture_ceiling must be a non-negative integer.")
+                # The budget must be the register and frequency product, not a number
+                # the author chose. A taste gate that can be hand-edited is not a gate.
+                effective_register = value.get("register", register)
+                effective_frequency = value.get("frequency", frequency)
+                if (effective_register in REGISTERS and effective_frequency in FREQUENCIES
+                        and is_number(ceiling) and is_int(gestures) and is_number(overshoot)):
+                    base_d, base_g, base_o = REGISTER_BUDGET_CEILINGS[effective_register]
+                    f_d, f_g, f_o = FREQUENCY_FACTORS[effective_frequency]
+                    expected_d = round(base_d * f_d, 3)
+                    expected_o = round(base_o * f_o, 3)
+                    expected_g = base_g if f_g > 0 else 0
+                    if abs(ceiling - expected_d) > 1e-6:
+                        errors.append(f"{prefix}.budget.duration_ceiling_s is {ceiling}; the "
+                                      f"{effective_register} register at "
+                                      f"{effective_frequency} frequency requires {expected_d}.")
+                    if gestures != expected_g:
+                        errors.append(f"{prefix}.budget.gesture_ceiling is {gestures}; the "
+                                      f"{effective_register} register at "
+                                      f"{effective_frequency} frequency requires {expected_g}.")
+                    if abs(overshoot - expected_o) > 1e-6:
+                        errors.append(f"{prefix}.budget.overshoot_ceiling is {overshoot}; the "
+                                      f"{effective_register} register at "
+                                      f"{effective_frequency} frequency requires {expected_o}.")
+
+
+def validate_lighting(value: object, prefix: str, errors: list[str]) -> None:
+    if not isinstance(value, dict):
+        errors.append(f"{prefix} must be an object.")
+        return
+    unknown = sorted(set(value) - LIGHTING_KEYS)
+    if unknown:
+        errors.append(f"{prefix} contains invalid fields: {unknown}")
+    species = value.get("shadow_species")
+    if species is not None and species not in SHADOW_SPECIES:
+        errors.append(f"{prefix}.shadow_species must be one of {sorted(SHADOW_SPECIES)}.")
+    for key in ("shadow_blur", "shadow_opacity", "light_azimuth", "light_elevation",
+                "specular_exponent"):
+        if key in value and (not is_number(value[key]) or value[key] < 0):
+            errors.append(f"{prefix}.{key} must be a non-negative number.")
+    offset = value.get("shadow_offset")
+    if offset is not None and (not isinstance(offset, list) or len(offset) != 2
+                               or not all(is_number(item) for item in offset)):
+        errors.append(f"{prefix}.shadow_offset must contain two finite numbers.")
+    if "catcher" in value and (not isinstance(value["catcher"], str) or not value["catcher"].strip()):
+        errors.append(f"{prefix}.catcher must be a non-empty string.")
+    # A shadow is a relationship between two surfaces. On a transparent master
+    # there is no catcher, so an uncaught shadow is a defect, not a style.
+    if species in {"hard", "ambient", "contact", "cast", "directional"} \
+            and not value.get("catcher"):
+        errors.append(f"{prefix}.shadow_species is {species} but no catcher is declared; "
+                      "a shadow needs a second surface and a transparent master has none.")
 
 
 def validate(data: object, check_files: bool = False, root: Path | None = None) -> list[str]:
@@ -422,6 +546,8 @@ def validate(data: object, check_files: bool = False, root: Path | None = None) 
             validate_mask(layer["mask"], f"{prefix}.mask", errors)
         if "effects" in layer:
             validate_effects(layer["effects"], f"{prefix}.effects", errors)
+        if "lighting" in layer:
+            validate_lighting(layer["lighting"], f"{prefix}.lighting", errors)
         # A stroke reveal and a true morph both resolve to the canonical final
         # transform, so neither may borrow the transform channel to animate.
         if "stroke" in layer and layer.get("easing") not in {"draw", "path-linear", "enter", "settle"}:

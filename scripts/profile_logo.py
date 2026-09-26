@@ -1461,6 +1461,28 @@ def recommend(profile: dict, min_confidence: float) -> dict:
     }
 
 
+def split_after_taste(decision: dict, taste: dict) -> tuple:
+    """Re-pick the primary and supporting gestures after the register veto."""
+    if not taste.get("vetoed"):
+        return decision["primary"], decision["supporting"]
+    primary = decision["primary"]
+    if primary and primary["technique"] in {entry["technique"] for entry in taste["vetoed"]}:
+        survivors = [item for item in decision["supporting"]
+                     if item["technique"] not in {e["technique"] for e in taste["vetoed"]}]
+        fallback = {
+            "technique": "mask_wipe",
+            "scenario_id": SCENARIO_IDS["mask_wipe"],
+            "role": "reveal",
+            "score": 0.0,
+            "reference": _reference_for("mask_wipe"),
+            "rules": [{"rule": "TASTE_FALLBACK", "weight": 0.0,
+                       "reason": "the recommended primary is vetoed by the register; a "
+                                 "whole-mark mask wipe is the documented floor"}],
+        }
+        primary = survivors[0] if survivors else fallback
+    return primary, decision["supporting"]
+
+
 def _reference_for(technique: str) -> str:
     """Root-relative reference path, matching the house path convention."""
     mapping = {
@@ -1484,6 +1506,299 @@ def _reference_for(technique: str) -> str:
         "scroll_scrub": "references/patterns/idle-and-ambient.md",
     }
     return mapping.get(technique, "references/taxonomy.md")
+
+
+# --------------------------------------------------------------------------
+# Taste layer. Structure says what is possible; taste says what fits.
+# A register veto is not a penalty. It is the brand declining the technique.
+# --------------------------------------------------------------------------
+
+# Registers mirror references/taste/brand-register.md. Keep the two in sync.
+REGISTERS = {
+    "premium": {
+        "label": "premium and minimal",
+        "max_overshoot": 0.0,
+        "max_duration_s": 1.2,
+        "max_gestures": 1,
+        "veto": ["particle_dissolve", "bounce_elastic", "orbit_rotate", "idle_loop",
+                 "geometric_construction", "separation_explode"],
+        "prefer": ["line_draw_on", "mask_wipe", "gradient_sweep", "morph_shape"],
+        "rationale": "the claim is that everything unnecessary was removed; a second "
+                     "gesture or an effect contradicts it",
+    },
+    "heritage": {
+        "label": "heritage and craft",
+        "max_overshoot": 0.0,
+        "max_duration_s": 3.0,
+        "max_gestures": 1,
+        "veto": ["particle_dissolve", "orbit_rotate", "geometric_construction",
+                 "idle_loop", "bounce_elastic"],
+        "prefer": ["line_draw_on", "multi_stroke_trace", "kinetic_typography",
+                   "circular_sweep"],
+        "rationale": "motion here is citation, not effect; any digital artefact reads "
+                     "as a software startup claiming a history it does not have",
+    },
+    "technology": {
+        "label": "technology and engineering",
+        "max_overshoot": 0.02,
+        "max_duration_s": 1.0,
+        "max_gestures": 2,
+        "veto": ["particle_dissolve", "bounce_elastic"],
+        "prefer": ["geometric_construction", "separation_ordered", "line_draw_on",
+                   "orbit_rotate"],
+        "rationale": "the register wants a system reporting state, not a character "
+                     "performing; organic easing lands in the mushy middle between "
+                     "registers where nothing is claimed",
+    },
+    "playful": {
+        "label": "playful and character",
+        "max_overshoot": 0.15,
+        "max_duration_s": 2.0,
+        "max_gestures": 3,
+        "veto": ["gradient_sweep"],
+        "prefer": ["bounce_elastic", "kinetic_typography", "morph_shape"],
+        "rationale": "the only register where elastic, secondary action, and "
+                     "anticipation are licensed at full strength",
+    },
+    "wellness": {
+        "label": "wellness and organic",
+        "max_overshoot": 0.05,
+        "max_duration_s": 3.0,
+        "max_gestures": 1,
+        "veto": ["particle_dissolve", "geometric_construction", "circular_sweep"],
+        "prefer": ["idle_loop", "morph_shape", "mask_wipe"],
+        "rationale": "cuts are percussive and this register has no percussion; a "
+                     "visible loop seam undoes the calm it is claiming",
+    },
+    "corporate": {
+        "label": "corporate and institutional",
+        "max_overshoot": 0.0,
+        "max_duration_s": 1.0,
+        "max_gestures": 1,
+        "veto": ["particle_dissolve", "bounce_elastic", "orbit_rotate",
+                 "geometric_construction", "gradient_sweep", "idle_loop",
+                 "morph_shape", "extrusion_3d"],
+        "prefer": ["mask_wipe", "kinetic_typography", "line_draw_on"],
+        "rationale": "the job is orientation, not expression; a fade is nearly always "
+                     "the answer and any effect is a competence signal",
+    },
+    "sport": {
+        "label": "energetic and sport",
+        "max_overshoot": 0.03,
+        "max_duration_s": 0.8,
+        "max_gestures": 1,
+        "veto": ["idle_loop", "morph_shape"],
+        "prefer": ["separation_explode", "kinetic_typography", "circular_sweep"],
+        "rationale": "the medium is fast; a slow logo stinger reads as a brand that "
+                     "does not watch the sport",
+    },
+    "luxury": {
+        "label": "bold and luxury",
+        "max_overshoot": 0.0,
+        "max_duration_s": 1.5,
+        "max_gestures": 1,
+        "veto": ["particle_dissolve", "bounce_elastic", "idle_loop",
+                 "geometric_construction", "separation_explode", "kinetic_typography"],
+        "prefer": ["mask_wipe", "gradient_sweep", "line_draw_on"],
+        "rationale": "the rule is amplitude not duration: one very large very slow "
+                     "move; a second move is the brand explaining itself",
+    },
+    "friendly": {
+        "label": "friendly and family",
+        "max_overshoot": 0.10,
+        "max_duration_s": 2.0,
+        "max_gestures": 2,
+        "veto": ["gradient_sweep", "circular_sweep"],
+        "prefer": ["bounce_elastic", "kinetic_typography", "idle_loop"],
+        "rationale": "what distinguishes it from technology is low mass, real "
+                     "overshoot, generous holds, and a slightly irregular rhythm; "
+                     "mechanical evenness reads as institutional",
+    },
+    "precision": {
+        "label": "technical and precision",
+        "max_overshoot": 0.0,
+        "max_duration_s": 0.6,
+        "max_gestures": 1,
+        "veto": ["bounce_elastic", "particle_dissolve", "idle_loop", "morph_shape",
+                 "extrusion_3d"],
+        "prefer": ["geometric_construction", "separation_ordered", "circular_sweep"],
+        "rationale": "cornered, stepped, near-instant; the correct answer is often a "
+                     "hard cut or motion blur rather than easing",
+    },
+    "editorial": {
+        "label": "editorial and cultural",
+        "max_overshoot": 0.03,
+        "max_duration_s": 2.5,
+        "max_gestures": 3,
+        "veto": ["particle_dissolve", "orbit_rotate", "extrusion_3d"],
+        "prefer": ["kinetic_typography", "line_draw_on", "mask_wipe"],
+        "rationale": "type-led; the mark is usually the least important thing on "
+                     "screen, so the system belongs to the type and the grid",
+    },
+}
+
+# Expected views by one person. The frequency multiplier is the primary
+# restraint mechanism: the same mark seen twice a day and once a year justify
+# two completely different amounts of motion.
+FREQUENCIES = {
+    "rare": {"label": "about once a year", "duration_factor": 1.0,
+             "gesture_factor": 1.0, "overshoot_factor": 1.0},
+    "occasional": {"label": "about once a session", "duration_factor": 0.8,
+                   "gesture_factor": 1.0, "overshoot_factor": 1.0},
+    "daily": {"label": "about once a day", "duration_factor": 0.5,
+              "gesture_factor": 1.0, "overshoot_factor": 0.0},
+    "frequent": {"label": "dozens of times a day", "duration_factor": 0.25,
+                 "gesture_factor": 1.0, "overshoot_factor": 0.0},
+    "keyboard": {"label": "keyboard-initiated", "duration_factor": 0.0,
+                 "gesture_factor": 0.0, "overshoot_factor": 0.0},
+}
+
+# The cliche register. A move is not dead because it is old; it is dead when it
+# is available as a template and carries no brand-specific information.
+CLICHES = {
+    "particle_dissolve": ("free with every particle system; reads as scale without a "
+                          "scale story", "B2B, financial, medical, legal, premium, and any "
+                          "vertical feed", "a build from parts in assembly order"),
+    "bounce_elastic": ("the default of every kinetic preset", "a playful or character "
+                       "register, and only on an asset seen rarely", "an arrival with a "
+                       "settle and no overshoot"),
+    "orbit_rotate": ("implies an objecthood a flat mark does not have", "flat identities, "
+                     "financial services, publishing, institutions", "a rotation inside "
+                     "the plane that reveals a second reading"),
+    "geometric_construction": ("one checkbox in a template", "marks with a published grid "
+                               "or genuine primitive construction", "a build in the real "
+                               "assembly order"),
+    "gradient_sweep": ("the specular highlight is the cheapest way to imply premium, and "
+                       "it has swept every logo", "a brand literally about reflective "
+                       "material", "a reveal that follows the mark's own construction"),
+    "separation_explode": ("reads as a complex system cheaply", "a system diagram or a "
+                           "product family with a genuine hierarchy", "assembly in the "
+                           "order the mark is constructed"),
+    "kinetic_typography": ("per-letter spring is the default preset", "a word of six "
+                           "characters or fewer in a playful voice", "type arriving on a "
+                           "shared baseline in reading order"),
+    "line_draw_on": ("trim path is one checkbox", "a signature, a hand-lettered wordmark, "
+                     "an engraved mark, a single-stroke monogram", "an aperture or mask "
+                     "reveal when the mark is not line art"),
+    "mask_wipe": ("a wipe always works, so it is always used", "wordmarks with a strong "
+                  "dominant axis", "a wipe whose axis derives from the mark's geometry"),
+    "scroll_scrub": ("free with a page transition", "a genuine spatial narrative", "a "
+                     "timed reveal that does not depend on the reader's scroll speed"),
+    "idle_loop": ("ambient motion is added to fill an empty requirement", "a mark with a "
+                  "documented reason to breathe, in a rare or occasional context", "a "
+                  "static rest state"),
+    "morph_shape": ("shape interpolation is one preset", "a mark that already changes "
+                    "state in the product, such as an app icon and a logo", "a cross-fade "
+                    "between two states with no shared geometry"),
+    "circular_sweep": ("clock and iris wipes are the oldest moves in the book", "a mark "
+                       "with genuine rotational symmetry", "a directional mask aligned to "
+                       "the mark's dominant axis"),
+    "extrusion_3d": ("pushed hard by render plugins; signals a 3D licence", "a brand for "
+                     "which the object is genuinely solid", "flat construction with real "
+                     "depth cues"),
+    "multi_stroke_trace": ("draw-on applied to marks that are not line art", "marks with "
+                           "genuine open strokes", "an aperture reveal"),
+}
+
+
+def taste_gate(profile: dict, ranked: list, register: str, frequency: str) -> dict:
+    """Apply the register veto, the frequency budget, and the cliche check.
+
+    A vetoed technique is removed from the ranking and reported with its reason.
+    A cliche is reported as a warning, not a veto: a cliche used once, in the
+    right register, with a stated referent is defensible.
+    """
+    result = {
+        "register": register,
+        "register_label": REGISTERS[register]["label"] if register in REGISTERS else None,
+        "frequency": frequency,
+        "frequency_label": FREQUENCIES[frequency]["label"] if frequency in FREQUENCIES else None,
+        "budget": {},
+        "permitted": [],
+        "vetoed": [],
+        "cliches": [],
+        "notes": [],
+    }
+    if register not in REGISTERS or frequency not in FREQUENCIES:
+        result["notes"].append("register or frequency not supplied; no taste gate applied")
+        result["permitted"] = [item["technique"] for item in ranked]
+        return result
+
+    spec = REGISTERS[register]
+    freq = FREQUENCIES[frequency]
+    duration_ceiling = round(spec["max_duration_s"] * freq["duration_factor"], 3)
+    gesture_ceiling = spec["max_gestures"] if freq["gesture_factor"] > 0 else 0
+    overshoot_ceiling = round(spec["max_overshoot"] * freq["overshoot_factor"], 3)
+    result["budget"] = {
+        "duration_ceiling_s": duration_ceiling,
+        "gesture_ceiling": gesture_ceiling,
+        "overshoot_ceiling": overshoot_ceiling,
+    }
+    if frequency == "keyboard":
+        result["notes"].append("a keyboard-initiated action should generally not animate; "
+                               "the gesture ceiling is zero by policy")
+    if overshoot_ceiling == 0.0 and spec["max_overshoot"] > 0:
+        result["notes"].append("frequency suppresses overshoot to zero regardless of register")
+
+    for item in ranked:
+        technique = item["technique"]
+        if technique in spec["veto"]:
+            result["vetoed"].append({
+                "technique": technique,
+                "scenario_id": item["scenario_id"],
+                "score": item["score"],
+                "reason": spec["rationale"],
+                "register": register,
+            })
+        else:
+            result["permitted"].append(technique)
+
+    for technique in result["permitted"]:
+        if technique in CLICHES:
+            why, dead_in, instead = CLICHES[technique]
+            result["cliches"].append({
+                "technique": technique,
+                "why": why,
+                "dead_in": dead_in,
+                "replacement": instead,
+                "verdict": "acceptable only with a stated brand referent and in a "
+                           "register that licenses it",
+            })
+
+    preferred = [t for t in result["permitted"] if t in spec["prefer"]]
+    if not preferred:
+        result["notes"].append(
+            f"no permitted technique sits in the {register} preferred vocabulary; the "
+            "register's preferred set needs a source capability the profile does not report")
+    else:
+        result["notes"].append(f"register-preferred and permitted: {', '.join(preferred)}")
+    if result["vetoed"]:
+        result["notes"].append("a vetoed technique must be dropped from the ranking, not "
+                               "demoted; record the register as the reason in the brief")
+    return result
+
+
+def apply_taste(ranked: list, taste: dict) -> list:
+    """Remove vetoed techniques and promote a register-preferred survivor."""
+    if not taste.get("vetoed"):
+        return ranked
+    vetoed = {entry["technique"] for entry in taste["vetoed"]}
+    permitted = [item for item in ranked if item["technique"] not in vetoed]
+    if permitted:
+        return permitted
+    # Every candidate was vetoed. A whole-mark mask wipe is the only move that is
+    # never forbidden by a register, so it becomes the documented floor.
+    fallback = {
+        "technique": "mask_wipe",
+        "scenario_id": SCENARIO_IDS["mask_wipe"],
+        "role": "reveal",
+        "score": 0.0,
+        "reference": _reference_for("mask_wipe"),
+        "rules": [{"rule": "TASTE_FALLBACK", "weight": 0.0,
+                   "reason": "every recommended technique is vetoed by the register; a "
+                             "whole-mark mask wipe is the only universally permitted reveal"}],
+    }
+    return [fallback]
 
 
 # --------------------------------------------------------------------------
@@ -1644,6 +1959,12 @@ def main() -> int:
                         help="include the stroke draw-on ordering plan")
     parser.add_argument("--min-confidence", type=float, default=0.0,
                         help="minimum score for a technique to be reported (default 0.0)")
+    parser.add_argument("--register", default="auto",
+                        help="brand register for the taste gate: " + ", ".join(sorted(REGISTERS))
+                             + ", or auto (default)")
+    parser.add_argument("--frequency", default="occasional",
+                        help="expected views by one person: " + ", ".join(sorted(FREQUENCIES))
+                             + " (default occasional)")
     parser.add_argument("--self-test", action="store_true",
                         help="run the dependency-free smoke test and exit")
     args = parser.parse_args()
@@ -1659,6 +1980,12 @@ def main() -> int:
     if not 0.0 <= args.min_confidence <= 1.0:
         print("min-confidence must be between 0 and 1.", file=sys.stderr)
         return 2
+    if args.register != "auto" and args.register not in REGISTERS:
+        print(f"register must be auto or one of {sorted(REGISTERS)}.", file=sys.stderr)
+        return 2
+    if args.frequency not in FREQUENCIES:
+        print(f"frequency must be one of {sorted(FREQUENCIES)}.", file=sys.stderr)
+        return 2
 
     try:
         result = profile(args.path)
@@ -1673,6 +2000,15 @@ def main() -> int:
         "capability": result.get("capability"),
     }
     decision = recommend(result, args.min_confidence)
+    ranked_all = [decision["primary"]] + decision["supporting"]
+    taste = taste_gate(result, ranked_all, args.register, args.frequency)
+    if args.register != "auto":
+        decision["primary"], decision["supporting"] = split_after_taste(decision, taste)
+        decision["taste"] = taste
+    else:
+        taste["notes"].append("register not supplied; the taste gate was not applied and "
+                              "no register veto was enforced")
+        decision["taste"] = taste
     if args.min_confidence > 0:
         decision["primary"] = decision["primary"] if \
             decision["primary"]["score"] >= args.min_confidence else None

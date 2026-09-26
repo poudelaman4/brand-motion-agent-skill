@@ -150,5 +150,121 @@
     "min_support_score": 0.35,
     "max_supporting_gestures": 2,
     "global_confidence_floor": 0.55
+  },
+  "registers": {
+    "premium": {
+      "max_duration_s": 1.2,
+      "max_gestures": 1,
+      "max_overshoot": 0.0
+    },
+    "heritage": {
+      "max_duration_s": 3.0,
+      "max_gestures": 1,
+      "max_overshoot": 0.0
+    },
+    "technology": {
+      "max_duration_s": 1.0,
+      "max_gestures": 2,
+      "max_overshoot": 0.02
+    },
+    "playful": {
+      "max_duration_s": 2.0,
+      "max_gestures": 3,
+      "max_overshoot": 0.15
+    },
+    "wellness": {
+      "max_duration_s": 3.0,
+      "max_gestures": 1,
+      "max_overshoot": 0.05
+    },
+    "corporate": {
+      "max_duration_s": 1.0,
+      "max_gestures": 1,
+      "max_overshoot": 0.0
+    },
+    "sport": {
+      "max_duration_s": 0.8,
+      "max_gestures": 1,
+      "max_overshoot": 0.03
+    },
+    "luxury": {
+      "max_duration_s": 1.5,
+      "max_gestures": 1,
+      "max_overshoot": 0.0
+    },
+    "friendly": {
+      "max_duration_s": 2.0,
+      "max_gestures": 2,
+      "max_overshoot": 0.1
+    },
+    "precision": {
+      "max_duration_s": 0.6,
+      "max_gestures": 1,
+      "max_overshoot": 0.0
+    },
+    "editorial": {
+      "max_duration_s": 2.5,
+      "max_gestures": 3,
+      "max_overshoot": 0.03
+    }
+  },
+  "frequencies": {
+    "rare": {
+      "duration_factor": 1.0,
+      "gesture_factor": 1.0,
+      "overshoot_factor": 1.0
+    },
+    "occasional": {
+      "duration_factor": 0.8,
+      "gesture_factor": 1.0,
+      "overshoot_factor": 1.0
+    },
+    "daily": {
+      "duration_factor": 0.5,
+      "gesture_factor": 1.0,
+      "overshoot_factor": 0.0
+    },
+    "frequent": {
+      "duration_factor": 0.25,
+      "gesture_factor": 1.0,
+      "overshoot_factor": 0.0
+    },
+    "keyboard": {
+      "duration_factor": 0.0,
+      "gesture_factor": 0.0,
+      "overshoot_factor": 0.0
+    }
+  },
+  "pace": {
+    "reading_wpm": 238,
+    "reading_chars_per_second": 18.9,
+    "fixation_ms": [
+      200,
+      250
+    ],
+    "per_character_ms": 68,
+    "consolidation_ms": 400,
+    "reading_floor_formula": "T_read = 200 ms + N * 68 ms + 400 ms",
+    "perception_threshold": "one sixtieth of mean velocity",
+    "max_invisible_tail_fraction": 0.25,
+    "stagger_ms": [
+      40,
+      70
+    ],
+    "delivery_ceiling_s": 2.5
+  },
+  "lighting": {
+    "shadows_per_mark_max": 2,
+    "elevation_states_max": 2,
+    "color_interpolation_filters": "sRGB",
+    "shadow_blur_pct_of_mark": [
+      0.5,
+      5.0
+    ],
+    "contact_offset_pct_of_mark": [
+      0.25,
+      0.75
+    ],
+    "sweep_peak_alpha_ceiling": 0.92
   }
 }

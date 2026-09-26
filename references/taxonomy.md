@@ -20,7 +20,11 @@ Record a classification before choosing a motion technique:
 ```text
 Anatomy: organic | geometric | monogram | lettermark | wordmark | badge | combination
 Narrative: trace | separate | assemble | unfold | mask | morph | sweep | route | stamp | state-change | loop
-Context: premium | education | playful | technology | wellness | general
+Context: premium | heritage | technology | playful | wellness | corporate | sport | luxury | friendly | precision | editorial | education | general
+Register: the brand personality cell the motion must answer to
+Frequency: rare | occasional | daily | frequent | keyboard
+Deliverable: broadcast | product-ui | social | presentation | physical | interactive | system
+Craft: light | depth | camera | pace
 Mode: audit | plan | produce | interactive
 Behavior: one-shot | loop | idle | state-change | ambient | scrub
 Runtime: Remotion | SVG | Lottie | dotLottie | After Effects | other
@@ -78,6 +82,8 @@ These are planning ranges, not a reason to force complexity onto a simple mark. 
 - **Technology/software:** use structure, routing, or modular logic; avoid unexplained neon and generic network effects.
 - **Wellness/organic:** favor breath, unfurl, and continuity; keep motion calm and provide a resting final state.
 - **General:** choose the simplest concept that explains the mark's structure.
+
+`Register` is a veto list, not a preference: it removes techniques outright. `Frequency` scales the register's duration, gesture, and overshoot ceilings. `Deliverable` decides which delivery reference binds. Read `taste/brand-register.md` and `technique-selection.md`.
 
 ## Mode, runtime, background, and platform
 
