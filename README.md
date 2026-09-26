@@ -67,6 +67,7 @@ brand-motion-agent-skill/
 │   └── check_skill.py               # Dependency-free self-check of this package
 ├── references/
 │   ├── technique-selection.md       # Detection algorithm, gates, and ranking
+│   ├── utilities.md                 # Script invocations, flags, and limits
 │   ├── patterns/                    # Organic, geometric, monogram, wordmark, badge
 │   │   ├── line-drawing-and-trace.md# Draw-on, trace, and dash mechanics
 │   │   ├── separation-and-explode.md# Burst, axis, depth, and slice separation
@@ -375,7 +376,7 @@ and a static fallback for unsupported runtimes. Use dotLottie or SVG state-machi
 
 ## Structure detection and technique recommendation
 
-`scripts/profile_logo.py` measures a source and ranks the techniques its structure supports, so the concept is chosen from evidence instead of from a prior. It measures a vector path census, open and closed subpath lengths, stroke paint and width, counters, components, symmetry, and a composite complexity score, then applies the evidence rules, feasibility gates, and conflict resolution documented in `references/technique-selection.md`.
+`scripts/profile_logo.py` measures a source and ranks the techniques its structure supports, so the concept is chosen from evidence instead of from a prior. `--register` is required: taste is a judgement about the brand rather than a property of the file, so the profiler refuses to guess and the manifest validator rejects a detection block with no taste budget. It measures a vector path census, open and closed subpath lengths, stroke paint and width, counters, components, symmetry, and a composite complexity score, then applies the evidence rules, feasibility gates, and conflict resolution documented in `references/technique-selection.md`.
 
 What it does not do matters as much:
 
@@ -420,12 +421,14 @@ The ranked output is a shortlist, not a decision: **at most one primary techniqu
 | Utility | Purpose | Typical command |
 |---|---|---|
 | `inspect_logo_assets.py` | Inspect alpha, dimensions, bounds, and diagnostic components | `python scripts/inspect_logo_assets.py logo.png` |
-| `profile_logo.py` | Measure a source's structure and rank the techniques it supports, with gated techniques reported separately | `python scripts/profile_logo.py logo.svg --draw-plan` |
+| `profile_logo.py` | Measure a source's structure, rank the techniques it supports, and apply the register veto; gated techniques are reported separately | `python scripts/profile_logo.py logo.svg --register premium --draw-plan` |
 | `profile_logo.py` | Dependency-free profiler smoke test over the vector fixture | `python scripts/profile_logo.py --self-test` |
 | `validate_motion_spec.py` | Validate frame timing, bounds, easing, pivots, and final transforms | `python scripts/validate_motion_spec.py motion-manifest.json --check-files` |
 | `make_checkpoint_contact_sheet.py` | Extract exact frame checkpoints into a review sheet | `python scripts/make_checkpoint_contact_sheet.py --input render.mp4 --output sheet.jpg --frames 0,30,60,96,119` |
 | `compare_final_frame.py` | Compare a decoded poster frame with an approved reference | `python scripts/compare_final_frame.py --reference logo.png --encoded render.mp4 --frame 119 --tolerance 0.03` |
-| `check_skill.py` | Dependency-free self-check of this package (frontmatter, reference links, schema, eval fixtures, validator smoke test) | `python scripts/check_skill.py` |
+| `check_skill.py` | Dependency-free self-check of this package (frontmatter, body size, reference links across the package, schema, eval fixtures, manifest validator, template contract, profiler, taste gate, volatile-figure dates) | `python scripts/check_skill.py` |
+
+`references/utilities.md` documents every flag, what each script does not do, and which utility belongs to which task mode.
 
 All Python utilities support `--help`. Optional dependencies are listed in `requirements.txt`.
 `check_skill.py` needs only the standard library, so it works as a CI or pre-commit gate.

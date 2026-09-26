@@ -116,7 +116,7 @@ Set the cycle to a whole number of frames, rounding seconds as `round(sec * fps)
 
 ## Determinism
 
-Make every animated value a pure function of the frame number and props; frame renderers evaluate a frame repeatedly, in parallel, and out of order. Do not use `Math.random()`, wall-clock time, or module-scope counters; replace runtime randomness with a seeded generator keyed on a stable string. Treat `time` and `sin`/`cos` of `time` in After Effects as acceptable and `wiggle()` as unreproducible across a re-creation. Bake Lottie and dotLottie keyframes, and assume neither player reads an OS motion preference (`accessibility-and-reduced-motion.md`).
+Make every animated value a pure function of the frame number and props; frame renderers evaluate a frame repeatedly, in parallel, and out of order. Do not use `Math.random()`, wall-clock time, or module-scope counters; replace runtime randomness with a seeded generator keyed on a stable string. Treat `time` and `sin`/`cos` of `time` in After Effects as acceptable and `wiggle()` as unreproducible across a re-creation. Bake Lottie and dotLottie keyframes, and assume neither player reads an OS motion preference (`delivery/accessibility-and-reduced-motion.md`).
 
 ## Resource budget
 

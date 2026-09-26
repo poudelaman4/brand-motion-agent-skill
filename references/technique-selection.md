@@ -209,7 +209,7 @@ When line drawing wins, derive the order from the geometry rather than inventing
 3. Choose each start point in priority order: a free degree-one endpoint first, then 12 o'clock clockwise for a closed mark, then reading direction for an open mark. Never start at a junction, where two caps coincide at frame 0.
 4. If the mark is mirror-symmetric about an axis and closed, do not start on that axis; it leaves a visible seam. Draw mirrored halves from the apex instead.
 5. Normalize duration by length when strokes should read as one pen at constant speed: duration is proportional to path length at a fixed speed. Use a designed sequence instead when the reveal should feel authored, and cap any pen-lift gap at about 250 ms.
-6. Emit per path a start fraction, an end fraction, a delay, and a duration. Read `line-drawing-and-trace.md` for the dash arithmetic and the junction handling.
+6. Emit per path a start fraction, an end fraction, a delay, and a duration. Read `patterns/line-drawing-and-trace.md` for the dash arithmetic and the junction handling.
 
 ## Limits
 

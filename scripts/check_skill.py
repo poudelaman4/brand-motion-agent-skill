@@ -78,6 +78,20 @@ def check_frontmatter(front: dict[str, str]) -> None:
             note(f"description is {len(description)} chars and reads long; tighten when convenient.")
 
 
+def resolves(rel: str, source: Path) -> bool:
+    """Does a backticked path resolve from any convention this package uses?
+
+    Three conventions are in use and all three are correct in context:
+    root-relative from SKILL.md, references-relative from a reference file
+    (siblings drop the `references/` prefix per the house rule), and
+    sibling-relative for a path in the same directory.
+    """
+    candidates = [ROOT / rel, ROOT / "references" / rel, source.parent / rel]
+    if rel.startswith("references/") and rel.count("/") == 1:
+        candidates.append(source.parent / Path(rel).name)
+    return any(candidate.exists() for candidate in candidates)
+
+
 def check_backtick_paths(body: str) -> None:
     seen: set[str] = set()
     for match in BACKTICK_PATH_RE.finditer(body):
@@ -87,11 +101,32 @@ def check_backtick_paths(body: str) -> None:
         if rel in seen:
             continue
         seen.add(rel)
-        target = ROOT / rel
-        if not target.exists():
+        if not resolves(rel, ROOT / "SKILL.md"):
             fail(f"SKILL.md references '{rel}' but the path does not exist.")
     if seen:
         note(f"checked {len(seen)} referenced file paths in SKILL.md.")
+
+
+def check_reference_paths() -> None:
+    """Backticked paths inside references must resolve too.
+
+    A reference is loaded on demand, so a broken path inside one is invisible
+    until an agent tries to follow it. Guard the whole package, not just the
+    file that is always loaded.
+    """
+    checked = unresolved = 0
+    for path in sorted((ROOT / "references").rglob("*.md")):
+        for match in BACKTICK_PATH_RE.finditer(path.read_text(encoding="utf-8")):
+            rel = match.group(1)
+            if "/" not in rel or rel.startswith(("http", "#")):
+                continue
+            checked += 1
+            if not resolves(rel, path):
+                unresolved += 1
+                fail(f"{path.relative_to(ROOT)} references '{rel}' but the path does "
+                     "not resolve from the skill root, from references/, or from its "
+                     "own directory.")
+    note(f"checked {checked} backticked paths across references/, {unresolved} unresolved.")
 
 
 def check_schema() -> None:
@@ -111,6 +146,32 @@ def check_schema() -> None:
         fail("motion-spec.schema.json should describe an object manifest.")
     if schema.get("required"):
         note(f"schema declares {len(schema['required'])} required root fields.")
+
+
+MAX_BODY_LINES = 500      # agentskills.io specification guidance
+MAX_BODY_TOKENS = 5000    # agentskills.io progressive-disclosure guidance
+
+
+def check_body_budget() -> None:
+    """Fail when SKILL.md outgrows the specification's guidance.
+
+    The specification loads the whole body on activation, so an oversized
+    SKILL.md is paid for on every task. The fix is to route to a reference,
+    not to keep appending, so this fails rather than advises.
+    """
+    text = (ROOT / "SKILL.md").read_text(encoding="utf-8")
+    match = FRONTMATTER_RE.match(text)
+    body = text[match.end():] if match else text
+    lines = len(body.splitlines())
+    tokens = len(body) // 4
+    if lines > MAX_BODY_LINES:
+        fail(f"SKILL.md body is {lines} lines; the guidance is under {MAX_BODY_LINES}. "
+             "Move detail into references/ and route to it.")
+    if tokens > MAX_BODY_TOKENS:
+        fail(f"SKILL.md body is about {tokens} tokens; the guidance is under "
+             f"{MAX_BODY_TOKENS}. Move detail into references/ and route to it.")
+    note(f"SKILL.md body is {lines} lines and about {tokens} tokens, against guidance "
+         f"of {MAX_BODY_LINES} lines and {MAX_BODY_TOKENS} tokens.")
 
 
 def check_evals() -> None:
@@ -287,6 +348,8 @@ def main() -> int:
     front, body = load_skill_md()
     check_frontmatter(front)
     check_backtick_paths(body)
+    check_reference_paths()
+    check_body_budget()
     check_schema()
     check_evals()
     check_manifest_validator()

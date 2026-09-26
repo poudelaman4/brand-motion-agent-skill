@@ -46,13 +46,9 @@ If the user does not name a mode, infer it from the requested deliverables. Ask 
 
 ## Source capability gate
 
-Before promising independent animation, determine whether the source is vector, layered raster, or a flattened composite.
+Determine whether the source is vector, layered, or a flattened composite before promising any independent motion. A flattened raster defaults to a whole-mark reveal, a grouped mask, or an approved group list; independent letters, leaves, and hidden overlaps are `BLOCKED` until the user approves a reconstruction. Live text must be outlined or embedded, never left to a runtime font.
 
-- **Vector/layered:** semantic transforms, masks, trim paths, and compatible morphs are available if the artwork exposes them.
-- **Flattened raster:** default to a whole-mark reveal, grouped masks, or manually approved groups. Independent letters, leaves, and hidden overlaps are `BLOCKED` unless the user approves a separately reconstructed asset.
-- **Live text:** outline or embed the approved wordmark; do not depend on a runtime font being installed.
-- **Diagnostic inspection:** `scripts/inspect_logo_assets.py` reports alpha bounds and connected components; connected components are evidence, not guaranteed semantic layers.
-- **Structural profile:** `scripts/profile_logo.py` measures the source, reports its capability rung, and ranks the techniques that structure supports. Use it on vector and raster sources alike; it needs no third-party package for SVG.
+Connected components are evidence, not layers. `references/patterns/feasibility.md` states what each family requires per source type, and `profile_logo.py` reports the source's capability rung and a gate code for every technique it rules out. Read the feasibility table before choosing, and the gate codes in the profiler output rather than judging capability by eye.
 
 ## Workflow
 
@@ -66,7 +62,7 @@ Before promising independent animation, determine whether the source is vector, 
 8. **Storyboard:** define the opening state, two to four milestones, settle frame, final hold, reduced-motion state, and acceptance checks before coding. For a stroke reveal, derive the draw order from the endpoint graph and the Eulerian check rather than inventing it. Hold the wordmark at full contrast for at least the reading floor in `references/craft/pace-and-rhythm.md`.
 9. **Build:** use approved source geometry. Extract or request layers once, store tight crops with bounds, and animate transforms/opacity around semantic pivots. Do not segment per frame. Carry each technique in its own channel: dash arithmetic for a draw-on, a direction and depth for a separation, matched path pairs for a morph, a mask type and angle for a wipe. For any extracted raster crossfade, inspect the layer alone and render the exact transition midpoint before accepting it.
 10. **Render variants:** derive outputs from the canonical spec using separate compositions or state definitions as needed.
-11. **QA:** render exact checkpoint frames, inspect the decoded video, compare the final state to the reference, and test target players/backgrounds. For opacity crossfades, inspect direct start/mid/end stills and decode the same frames from the final file. Read `references/qa/qa-checklist.md`.
+11. **QA:** render exact checkpoint frames, inspect the decoded video, compare the final state to the reference, and test target players/backgrounds. For opacity crossfades, inspect direct start/mid/end stills and decode the same frames from the final file. Read `references/qa/qa-checklist.md` and `references/utilities.md` for the checkpoint-sheet and final-frame commands.
 12. **Package:** deliver the source, final motion, static poster, required variants, manifest, render commands, and a pass/warn/blocked report.
 
 ## Hard blockers and provisional defaults
@@ -81,83 +77,90 @@ Everything else can use the defaults in `assets/motion-tokens.json` and `referen
 
 ## Default contract
 
-- One-shot reveal: normally 1.2–2.4 seconds; use up to 4 seconds for a detailed organic mark or meaningful sequential wordmark.
-- Rendered video: 30 fps unless specified; four seconds is 120 frames at 30 fps.
-- Final hold: 500–1000 ms for an intro; indefinite for a persistent UI mark.
-- Primary mark: one dominant gesture; wordmark: a quiet fade, mask, or baseline-settled stagger.
-- Overshoot: 0% for identity-critical geometry; at most 5% for organic motion and at most 8% for explicitly playful accents.
-- Backgrounds: keep an alpha master and provide a white or brand-color fallback when the target player is uncertain.
-- Audio: silent by default; add only user-approved cues.
-- Reduced motion: show the approved final state immediately, optionally with a short opacity dissolve.
+Keep an alpha master and provide a white or brand-colour fallback when the target player is uncertain. Stay silent by default and add only user-approved audio cues. Show the approved final state immediately under reduced motion, optionally with a short opacity dissolve.
+
+Every remaining default lives in `assets/motion-tokens.json` as a value, including durations, easing curves, stagger windows, overshoot ceilings, the register budgets, the reading floor, and the lighting ranges. Read that file rather than restating a number, and change the token rather than the prose when a default moves.
 
 ## Pattern routing
 
-Read only the references needed for the current task:
+Read only the references the current task needs.
+
+Start here:
 
 - Classification and selection: `references/taxonomy.md`
-- Structure detection and technique recommendation: `references/technique-selection.md`
-- Pattern feasibility by source type: `references/patterns/feasibility.md`
-- Intake, defaults, and approvals: `references/intake-and-planning.md`
-- Timing, easing, pivots, and layer grammar: `references/motion-foundations.md`
-- Organic/botanical marks: `references/patterns/organic-botanical.md`
-- Geometric/constructive marks: `references/patterns/geometric-constructive.md`
-- Monograms and lettermarks: `references/patterns/monogram-and-lettermark.md`
-- Wordmarks and lockups: `references/patterns/wordmark-and-lockup.md`
-- Badges and emblems: `references/patterns/badge-and-emblem.md`
-- Line drawing, stroke trace, and draw order: `references/patterns/line-drawing-and-trace.md`
+- Detection and recommendation: `references/technique-selection.md`
+- Feasibility by source type: `references/patterns/feasibility.md`
+- Intake, defaults, approvals: `references/intake-and-planning.md`
+- Timing, easing, pivots, layers: `references/motion-foundations.md`
 
-Read the craft layer for anything that applies to every technique, not just one:
+By anatomy:
 
-- Light, shadow, and elevation: `references/craft/light-and-shadow.md`
-- Depth, material, and surface: `references/craft/depth-and-material.md`
-- Camera, perspective, and framing: `references/craft/camera-and-perspective.md`
-- Pace, rhythm, reading floor, and frame budgets: `references/craft/pace-and-rhythm.md`
+- Organic and botanical: `references/patterns/organic-botanical.md`
+- Geometric and constructive: `references/patterns/geometric-constructive.md`
+- Monogram and lettermark: `references/patterns/monogram-and-lettermark.md`
+- Wordmark and lockup: `references/patterns/wordmark-and-lockup.md`
+- Badge and emblem: `references/patterns/badge-and-emblem.md`
+- Line drawing and draw order: `references/patterns/line-drawing-and-trace.md`
+- Separation and occlusion order: `references/patterns/separation-and-explode.md`
+- Kinetic typography: `references/patterns/kinetic-typography.md`
+- Idle and ambient: `references/patterns/idle-and-ambient.md`
+- Matter and particles: `references/patterns/matter-and-particles.md`
 
-Read the taste layer before choosing or reviewing:
+Craft, for any technique rather than one:
 
-- Brand register and what each register forbids: `references/taste/brand-register.md`
-- Cliché doctrine, machine defaults, and restraint: `references/taste/cliche-and-restraint.md`
-- Quality tests and the review vocabulary: `references/taste/quality-tests.md`
-- The fit decision procedure, precedence, and refusals: `references/taste/fit-decisions.md`
-- Separation, explode, and occlusion order: `references/patterns/separation-and-explode.md`
-- Per-glyph and variable-axis typography: `references/patterns/kinetic-typography.md`
-- Idle loops, rest states, and interactive sets: `references/patterns/idle-and-ambient.md`
-- Particles, dissolve, turbulence, and glitch: `references/patterns/matter-and-particles.md`
-- Education/LMS context: `references/contexts/education-and-lms.md`
-- Premium/minimal context: `references/contexts/premium-and-minimal.md`
-- Playful/character context: `references/contexts/playful-and-character.md`
-- Technology/software context: `references/contexts/technology-and-software.md`
-- Wellness/organic context: `references/contexts/wellness-and-organic.md`
-- Backgrounds, alpha, codecs, and formats: `references/delivery/backgrounds-and-formats.md`, `references/delivery/alpha-and-codecs.md`
-- Broadcast, safe areas, and legal minimums: `references/delivery/broadcast-and-media.md`
-- Product UI, states, and platform prohibitions: `references/delivery/digital-product-and-ui.md`
-- Social, editorial, and platform covered zones: `references/delivery/social-and-editorial.md`
-- Signage, events, installations, and realtime: `references/delivery/physical-and-events.md`
-- Motion systems, tokens, and component handoff: `references/delivery/motion-system-and-handoff.md`
+- Light, shadow, elevation: `references/craft/light-and-shadow.md`
+- Depth, material, surface: `references/craft/depth-and-material.md`
+- Camera, perspective, framing: `references/craft/camera-and-perspective.md`
+- Pace, rhythm, reading floor: `references/craft/pace-and-rhythm.md`
+
+Taste, before choosing or reviewing:
+
+- Register and its vetoes: `references/taste/brand-register.md`
+- Cliché, machine defaults, restraint: `references/taste/cliche-and-restraint.md`
+- Quality tests, review vocabulary: `references/taste/quality-tests.md`
+- Fit decisions, precedence, refusals: `references/taste/fit-decisions.md`
+
+By context:
+
+- Education and LMS: `references/contexts/education-and-lms.md`
+- Premium and minimal: `references/contexts/premium-and-minimal.md`
+- Playful and character: `references/contexts/playful-and-character.md`
+- Technology and software: `references/contexts/technology-and-software.md`
+- Wellness and organic: `references/contexts/wellness-and-organic.md`
+
+Delivery:
+
+- Backgrounds, alpha, codecs, formats: `references/delivery/backgrounds-and-formats.md`, `references/delivery/alpha-and-codecs.md`
+- Broadcast, safe areas, legal minimums: `references/delivery/broadcast-and-media.md`
+- Product UI and platform prohibitions: `references/delivery/digital-product-and-ui.md`
+- Social and platform covered zones: `references/delivery/social-and-editorial.md`
+- Signage, events, realtime: `references/delivery/physical-and-events.md`
+- Motion systems and handoff: `references/delivery/motion-system-and-handoff.md`
 - Accessibility and reduced motion: `references/delivery/accessibility-and-reduced-motion.md`
-- Remotion implementation: `references/implementation/remotion.md`
-- Flattened-raster implementation: `references/implementation/flattened-raster.md`
-- SVG/Lottie implementation: `references/implementation/vector-and-lottie.md`
-- Cross-renderer mechanics for the advanced families: `references/implementation/advanced-mechanics.md`
-- After Effects implementation: `references/implementation/after-effects.md`
-- Manifest contract: `references/qa/motion-manifest.md`, `schemas/motion-spec.schema.json`
+
+Implementation:
+
+- Remotion: `references/implementation/remotion.md`
+- Flattened raster: `references/implementation/flattened-raster.md`
+- SVG and Lottie: `references/implementation/vector-and-lottie.md`
+- Cross-renderer advanced mechanics: `references/implementation/advanced-mechanics.md`
+- After Effects: `references/implementation/after-effects.md`
+
+QA and provenance:
+
+- Manifest contract: `references/qa/motion-manifest.md`
 - QA gates: `references/qa/qa-checklist.md`
 - Review matrix: `references/qa/review-matrix.md`
 - Failure catalog: `references/qa/failure-catalog.md`
-- Research provenance: `references/sources.md` (read when validating principles or updating the skill)
+- Research provenance: `references/sources.md`
 
 ## Useful bundled utilities
 
-Run commands from the skill root or use absolute paths. Python utilities require Python 3.10+; optional packages are listed in `requirements.txt`.
+Three utilities matter in every mode:
 
-- `python scripts/inspect_logo_assets.py path/to/logo.png` reports dimensions, alpha bounds, and large connected components; it does not extract semantic layers.
-- `python scripts/validate_motion_spec.py path/to/motion-spec.json` validates the manifest contract.
-- `python scripts/make_checkpoint_contact_sheet.py --input video.mp4 --output contact-sheet.jpg --frames 0,30,60,96,119` creates a frame-accurate review sheet.
-- `python scripts/compare_final_frame.py --reference reference.png --encoded video.mp4 --frame 119 --tolerance 0.03` performs a documented final-state check; add `--allow-opaque` only when an opaque white/brand render is intentionally being compared to a transparent reference.
-- `python scripts/profile_logo.py path/to/logo.svg --register <register>` reports the structural fingerprint, capability rung, ranked techniques, gated techniques with their codes, and the taste budget. `--register` is required; the profiler exits 2 without it. Add `--frequency` for the expected view count, `--draw-plan` for the stroke draw-on ordering, and `--json` for machine-readable output.
-- `python scripts/profile_logo.py path/to/logo.svg --register luxury --frequency daily` applies the taste gate: it drops every technique the register vetoes, reports the duration, gesture, and overshoot ceilings, and flags cliché risk. Registers and frequencies are listed by `--help`.
-- `python scripts/profile_logo.py --self-test` is a dependency-free smoke test of the profiler; it needs no Pillow, NumPy, or SciPy.
-- `python scripts/check_skill.py` is a dependency-free self-check of this package (frontmatter, reference links, schema, eval fixtures, the manifest validator, the advanced manifest channels, and the profiler); run it after editing the skill.
+- `python scripts/profile_logo.py path/to/logo.svg --register <register>` measures the source, ranks techniques, applies the register veto, and returns the taste budget. `--register` is required. Read `references/utilities.md` for every flag, the remaining scripts, and what each one does not do.
+
+Run `python scripts/check_skill.py` after editing this package.
 
 ## Output contract
 
