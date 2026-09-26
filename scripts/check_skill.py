@@ -307,6 +307,44 @@ def check_volatile_figures() -> None:
             note(f"{rel} volatile figures verified {age_days} days ago.")
 
 
+def check_environment_probe() -> None:
+    """The probe must run clean and agree with itself.
+
+    A probe that cannot detect its own breakage is worse than no probe, so this
+    runs it and cross-checks the mode verdicts against the capability states.
+    """
+    script = ROOT / "scripts" / "check_environment.py"
+    if not script.exists():
+        fail("scripts/check_environment.py is missing.")
+        return
+    result = subprocess.run([sys.executable, str(script), "--self-test"],
+                            capture_output=True, text=True)
+    if result.returncode != 0:
+        fail(f"environment probe self-test failed: "
+             f"{result.stderr.strip() or result.stdout.strip()}")
+        return
+    report = subprocess.run([sys.executable, str(script), "--json"],
+                            capture_output=True, text=True)
+    if report.returncode != 0:
+        fail(f"environment probe --json failed: {report.stderr.strip()}")
+        return
+    try:
+        document = json.loads(report.stdout)
+    except json.JSONDecodeError as exc:
+        fail(f"environment probe did not emit valid JSON: {exc}")
+        return
+    states = {item["capability"]: item["state"] for item in document.get("capabilities", [])}
+    if len(states) != len(document.get("capabilities", [])):
+        fail("environment probe reported a capability name twice.")
+    for mode in document.get("modes", []):
+        verdict = mode.get("verdict")
+        if verdict == "ok" and any(states.get(name) == "missing"
+                                   for name in mode.get("missing", []) or []):
+            fail(f"mode {mode.get('mode')} is ok but lists missing capabilities.")
+    note(f"environment probe reports {len(states)} capabilities across "
+         f"{len(document.get('modes', []))} task modes.")
+
+
 def check_profiler() -> None:
     script = ROOT / "scripts" / "profile_logo.py"
     fixture = ROOT / "evals" / "files" / "layered-mark.svg"
@@ -355,6 +393,7 @@ def main() -> int:
     check_manifest_validator()
     check_profiler()
     check_volatile_figures()
+    check_environment_probe()
 
     for message in NOTES:
         print(f"note: {message}")

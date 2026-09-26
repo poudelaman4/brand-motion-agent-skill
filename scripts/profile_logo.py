@@ -889,7 +889,11 @@ def profile_raster(path: Path) -> dict:
         from PIL import Image
     except ImportError:
         return {"kind": "raster-unavailable",
-                "warnings": ["Pillow and NumPy are required to profile a raster source."]}
+                "warnings": ["Pillow and NumPy are required to profile a raster "
+                             "source. Install with: python -m pip install "
+                             "\"Pillow>=9.0\" \"numpy>=1.23\", or run "
+                             "scripts/check_environment.py for the full report. Vector "
+                             "profiling needs no third-party package."]}
 
     warnings: list[str] = []
     try:
@@ -965,7 +969,10 @@ def profile_raster(path: Path) -> dict:
         profile["hole_count"] = len(hole_labels)
         profile["hole_area_ratio"] = round(hole_pixels / ink_pixels, 4)
     except ImportError:
-        warnings.append("SciPy is unavailable; hole and component metrics were skipped.")
+        warnings.append("SciPy is unavailable, so hole, component, stroke-width, and "
+                        "adjacency metrics were skipped and confidence is reduced. "
+                        "Install with: python -m pip install \"scipy>=1.9\". See "
+                        "references/setup-and-environment.md for the fallback.")
         ndimage = None
 
     if ndimage is not None:

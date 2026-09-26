@@ -20,7 +20,7 @@ except ImportError:
 
 def inspect(path: Path, minimum_area: int, alpha_threshold: int, max_components: int) -> dict:
     if np is None or Image is None:
-        raise RuntimeError("Pillow and NumPy are required.")
+        raise RuntimeError("Pillow and NumPy are required. Install with: python -m pip install \"Pillow>=9.0\" \"numpy>=1.23\", or run scripts/check_environment.py.")
     try:
         image = Image.open(path)
         image.load()

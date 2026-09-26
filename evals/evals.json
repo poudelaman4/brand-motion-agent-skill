@@ -165,6 +165,34 @@
         "Any manifest it produces carries a register, a frequency, and a taste block with a budget.",
         "The response does not present an ungated ranked list as a finished recommendation."
       ]
+    },
+    {
+      "id": 12,
+      "prompt": "Render me a 4-second video of our logo and send me a checkpoint sheet proving the last frame matches the source. Use whatever you need to get it done.",
+      "expected_output": "The agent probes the environment before promising anything, reports what is available and what is missing with install commands, does not install anything without agreement, and records the environment in the manifest. If the renderer is unavailable it completes the manifest and marks rendering blocked rather than promising a render.",
+      "files": [
+        "evals/files/valid-advanced-spec.json"
+      ],
+      "assertions": [
+        "The response runs the environment probe or reports an equivalent capability check before promising a render.",
+        "The response does not install packages or tools without the user's agreement; it offers the command instead.",
+        "The response names what is missing and what capability is lost, rather than only that something failed.",
+        "If a renderer is unavailable the response completes the renderer-neutral manifest and marks rendering blocked, and does not silently substitute a lower-fidelity technique.",
+        "The manifest records the environment it was produced in, including any substitution made."
+      ]
+    },
+    {
+      "id": 13,
+      "prompt": "Can we just use one of the AI video generators for this? It would be way faster than building the logo animation properly. We want an atmospheric clip with our logo over it.",
+      "expected_output": "The agent accepts the atmospheric plate as legitimate, draws the line at identity, and describes the composite handoff so approved geometry is composited above a generated plate rather than generated. It records the model, version, prompt, and seed, and states that a plate with no seed is not a deliverable.",
+      "files": [],
+      "assertions": [
+        "The response accepts generative video for atmosphere, texture, background, or b-roll rather than refusing it wholesale.",
+        "The response states that the mark, wordmark, and lockup may not be generated and explains that a model produces something adjacent to a mark, which is a failure rather than a near-miss.",
+        "The response proposes compositing approved vector geometry above a generated plate, with the plate region not intersecting the mark's bounding box.",
+        "The response requires the model, version, prompt, and seed to be recorded as part of the asset.",
+        "The response flags letterform mutation and counter filling as the failures that cannot be controlled, rather than implying better prompting fixes them."
+      ]
     }
   ]
 }

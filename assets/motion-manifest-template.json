@@ -41,6 +41,31 @@
   ],
   "target_player": "web and desktop video",
   "renderer": "Remotion",
+  "environment": {
+    "probed_on": "YYYY-MM-DD",
+    "mode_verdict": "ok",
+    "tool": "scripts/check_environment.py",
+    "renderer_rung": 3,
+    "capabilities": [
+      {
+        "capability": "python",
+        "state": "ok",
+        "detail": "replace-me"
+      },
+      {
+        "capability": "ffmpeg",
+        "state": "ok",
+        "detail": "replace-me"
+      },
+      {
+        "capability": "remotion",
+        "state": "ok",
+        "detail": "replace-me"
+      }
+    ],
+    "degraded_features": [],
+    "substitutions": []
+  },
   "detection": {
     "tool": "scripts/profile_logo.py",
     "capability_rung": 4,

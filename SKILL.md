@@ -37,6 +37,9 @@ If the user does not name a mode, infer it from the requested deliverables. Ask 
 - Name the referent for every movement: physical, structural, historical, or semiotic. A movement with no referent is decoration and must survive the delete test.
 - Honour the platform before the preference. A platform guideline, a legal minimum, and a stated brand claim all outrank an inferred register or a structural opportunity.
 - Treat light and shadow as claims about volume, not as polish. A shadow is a relationship between two surfaces, so a shadow on a transparent master with no catcher is a defect.
+- Probe the environment before promising a deliverable, and never install anything without the user's agreement. Print the command and let the user run it.
+- Never promise a renderer rung the machine cannot support, and never fall to a lower rung without agreeing it with the user first. A substitution that changes what the motion looks like must be recorded, not absorbed.
+- Treat generative video as a plate source, never an identity source. A model may produce atmosphere, texture, b-roll, and background; it may not produce the mark, the wordmark, or the lockup. Record the model, version, prompt, and seed, because a plate with no seed is not a deliverable.
 - Keep the camera, artboard, clear space, and final lockup stable. Animate inside a fixed composition rather than repeatedly reframing the logo.
 - Treat the final state as a golden state. Verify canonical geometry, text metrics, color, alpha, and clear space against the reference; use documented tolerances for encoded RGB output.
 - For Remotion or other rendered video, drive every value from the frame number. Explicit state machines are allowed for interactive SVG/dotLottie runtimes.
@@ -53,17 +56,18 @@ Connected components are evidence, not layers. `references/patterns/feasibility.
 ## Workflow
 
 1. **Intake:** identify the canonical source, task mode, and whether independent layer motion is mandatory. Treat other missing preferences as documented provisional defaults.
-2. **Classify:** record anatomy, narrative archetype, context, mode, runtime, background, and platform. Read `references/taxonomy.md`.
-3. **Lock the source:** identify approved variants, layer inventory, alpha mode, profile, resolution, and pivots. Run the inspector on raster sources.
-4. **Profile and recommend:** run `scripts/profile_logo.py` on the locked source. Read the capability rung, the ranked techniques, the gated techniques and their codes, and the draw plan when line drawing is in contention. Keep at most one primary and two supporting; the brand context modifier still decides. Read `references/technique-selection.md`.
-5. **Apply taste and context:** run the profiler with `--register` and `--frequency`. The register is required and the profiler refuses to run without it, because taste is a judgement about the brand and not a property of the file. Take the register from a stated brand claim or an explicit user answer and label the inference `inferred`; never infer it from the asset's structure. Drop every vetoed technique rather than demoting it, note the register as the reason, read the cliche warnings, and take the duration, gesture, and overshoot ceilings from the taste block. Read `references/taste/brand-register.md`, `references/taste/cliche-and-restraint.md`, and `references/taste/fit-decisions.md`.
-6. **Choose a concept:** select one primary pattern from the matching reference. Keep the wordmark subordinate until the mark is readable unless text is the hero. When the profile or the register recommends something else, record why.
-7. **Write the brief:** fill `assets/motion-brief-template.json`; keep the executable manifest in `assets/motion-manifest-template.json`.
-8. **Storyboard:** define the opening state, two to four milestones, settle frame, final hold, reduced-motion state, and acceptance checks before coding. For a stroke reveal, derive the draw order from the endpoint graph and the Eulerian check rather than inventing it. Hold the wordmark at full contrast for at least the reading floor in `references/craft/pace-and-rhythm.md`.
-9. **Build:** use approved source geometry. Extract or request layers once, store tight crops with bounds, and animate transforms/opacity around semantic pivots. Do not segment per frame. Carry each technique in its own channel: dash arithmetic for a draw-on, a direction and depth for a separation, matched path pairs for a morph, a mask type and angle for a wipe. For any extracted raster crossfade, inspect the layer alone and render the exact transition midpoint before accepting it.
-10. **Render variants:** derive outputs from the canonical spec using separate compositions or state definitions as needed.
-11. **QA:** render exact checkpoint frames, inspect the decoded video, compare the final state to the reference, and test target players/backgrounds. For opacity crossfades, inspect direct start/mid/end stills and decode the same frames from the final file. Read `references/qa/qa-checklist.md` and `references/utilities.md` for the checkpoint-sheet and final-frame commands.
-12. **Package:** deliver the source, final motion, static poster, required variants, manifest, render commands, and a pass/warn/blocked report.
+2. **Probe the environment:** run `python scripts/check_environment.py` before promising a render, checkpoint sheet, or final-state check. Treat `degraded` as a documented loss, `missing` as a choice to offer the user rather than an install to perform, and `blocked` as a delivery-scope change to agree before falling to a lower renderer rung. Read `references/setup-and-environment.md`.
+3. **Classify:** record anatomy, narrative archetype, context, mode, runtime, background, and platform. Read `references/taxonomy.md`.
+4. **Lock the source:** identify approved variants, layer inventory, alpha mode, profile, resolution, and pivots. Run the inspector on raster sources.
+5. **Profile and recommend:** run `scripts/profile_logo.py` on the locked source. Read the capability rung, the ranked techniques, the gated techniques and their codes, and the draw plan when line drawing is in contention. Keep at most one primary and two supporting; the brand context modifier still decides. Read `references/technique-selection.md`.
+6. **Apply taste and context:** run the profiler with `--register` and `--frequency`. The register is required and the profiler refuses to run without it, because taste is a judgement about the brand and not a property of the file. Take the register from a stated brand claim or an explicit user answer and label the inference `inferred`; never infer it from the asset's structure. Drop every vetoed technique rather than demoting it, note the register as the reason, read the cliche warnings, and take the duration, gesture, and overshoot ceilings from the taste block. Read `references/taste/brand-register.md`, `references/taste/cliche-and-restraint.md`, and `references/taste/fit-decisions.md`.
+7. **Choose a concept:** select one primary pattern from the matching reference. Keep the wordmark subordinate until the mark is readable unless text is the hero. When the profile or the register recommends something else, record why.
+8. **Write the brief:** fill `assets/motion-brief-template.json`; keep the executable manifest in `assets/motion-manifest-template.json`.
+9. **Storyboard:** define the opening state, two to four milestones, settle frame, final hold, reduced-motion state, and acceptance checks before coding. For a stroke reveal, derive the draw order from the endpoint graph and the Eulerian check rather than inventing it. Hold the wordmark at full contrast for at least the reading floor in `references/craft/pace-and-rhythm.md`.
+10. **Build:** use approved source geometry. Extract or request layers once, store tight crops with bounds, and animate transforms/opacity around semantic pivots. Do not segment per frame. Carry each technique in its own channel: dash arithmetic for a draw-on, a direction and depth for a separation, matched path pairs for a morph, a mask type and angle for a wipe. For any extracted raster crossfade, inspect the layer alone and render the exact transition midpoint before accepting it.
+11. **Render variants:** derive outputs from the canonical spec using separate compositions or state definitions as needed.
+12. **QA:** render exact checkpoint frames, inspect the decoded video, compare the final state to the reference, and test target players/backgrounds. For opacity crossfades, inspect direct start/mid/end stills and decode the same frames from the final file. Read `references/qa/qa-checklist.md` and `references/utilities.md` for the checkpoint-sheet and final-frame commands.
+13. **Package:** deliver the source, final motion, static poster, required variants, manifest, render commands, and a pass/warn/blocked report.
 
 ## Hard blockers and provisional defaults
 
@@ -148,6 +152,8 @@ Implementation:
 
 QA and provenance:
 
+- Environment, renderer ladder, and install guidance: `references/setup-and-environment.md`
+- Generative video as a constrained plate source: `references/delivery/generative-and-ai-video.md`
 - Manifest contract: `references/qa/motion-manifest.md`
 - QA gates: `references/qa/qa-checklist.md`
 - Review matrix: `references/qa/review-matrix.md`
@@ -160,7 +166,7 @@ Three utilities matter in every mode:
 
 - `python scripts/profile_logo.py path/to/logo.svg --register <register>` measures the source, ranks techniques, applies the register veto, and returns the taste budget. `--register` is required. Read `references/utilities.md` for every flag, the remaining scripts, and what each one does not do.
 
-Run `python scripts/check_skill.py` after editing this package.
+Run `python scripts/check_environment.py` to see what this machine can do, and `python scripts/check_skill.py` after editing this package.
 
 ## Output contract
 

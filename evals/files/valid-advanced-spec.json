@@ -352,5 +352,69 @@
       "path": "renders/mark-white.mp4",
       "codec": "h264"
     }
-  ]
+  ],
+  "environment": {
+    "probed_on": "2026-09-26",
+    "mode_verdict": "degraded",
+    "tool": "scripts/check_environment.py",
+    "renderer_rung": 3,
+    "capabilities": [
+      {
+        "capability": "python",
+        "state": "ok",
+        "detail": "3.14.7 on Linux x86_64"
+      },
+      {
+        "capability": "pillow",
+        "state": "ok",
+        "detail": "version 12.3.0"
+      },
+      {
+        "capability": "numpy",
+        "state": "ok",
+        "detail": "version 2.5.3"
+      },
+      {
+        "capability": "scipy",
+        "state": "ok",
+        "detail": "version 1.18.1"
+      },
+      {
+        "capability": "ffmpeg",
+        "state": "ok",
+        "detail": "/usr/bin/ffmpeg"
+      },
+      {
+        "capability": "ffprobe",
+        "state": "ok",
+        "detail": "/usr/bin/ffprobe"
+      },
+      {
+        "capability": "remotion",
+        "state": "degraded",
+        "detail": "Node v22.23.1 present, no Chrome binary found",
+        "degrades": "Remotion fetches its own headless Chrome on first run; rendering is blocked on an offline or locked-down machine"
+      },
+      {
+        "capability": "potrace",
+        "state": "missing",
+        "detail": "not on PATH",
+        "degrades": "a flattened raster stays flattened"
+      },
+      {
+        "capability": "disk",
+        "state": "ok",
+        "detail": "102 GB free"
+      },
+      {
+        "capability": "hardware",
+        "state": "ok",
+        "detail": "12 logical cores"
+      }
+    ],
+    "degraded_features": [
+      "Remotion headless Chrome is fetched on first run, so a first render may fail on an offline machine"
+    ],
+    "substitutions": []
+  }
 }

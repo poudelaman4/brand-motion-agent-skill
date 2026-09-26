@@ -119,6 +119,9 @@
     },
     "detection": {
       "$ref": "#/$defs/detection"
+    },
+    "environment": {
+      "$ref": "#/$defs/environment"
     }
   },
   "$defs": {
@@ -836,6 +839,81 @@
         "catcher": {
           "type": "string",
           "minLength": 1
+        }
+      },
+      "additionalProperties": false
+    },
+    "environment": {
+      "type": "object",
+      "description": "The machine a manifest was produced and rendered on, from scripts/check_environment.py. Record it so a re-render can be shown to match the approved render.",
+      "required": [
+        "probed_on",
+        "mode_verdict",
+        "capabilities"
+      ],
+      "properties": {
+        "probed_on": {
+          "type": "string",
+          "minLength": 1
+        },
+        "mode_verdict": {
+          "enum": [
+            "ok",
+            "degraded",
+            "blocked"
+          ]
+        },
+        "tool": {
+          "type": "string",
+          "minLength": 1
+        },
+        "renderer_rung": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 5
+        },
+        "capabilities": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": [
+              "capability",
+              "state"
+            ],
+            "properties": {
+              "capability": {
+                "type": "string",
+                "minLength": 1
+              },
+              "state": {
+                "enum": [
+                  "ok",
+                  "degraded",
+                  "missing",
+                  "blocked"
+                ]
+              },
+              "detail": {
+                "type": "string"
+              },
+              "degrades": {
+                "type": "string"
+              }
+            },
+            "additionalProperties": false
+          }
+        },
+        "degraded_features": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "substitutions": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
         }
       },
       "additionalProperties": false

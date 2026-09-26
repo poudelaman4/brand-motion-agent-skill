@@ -18,7 +18,10 @@ REQUIRED = {
     "poster_frame",
     "layers",
 }
-ALLOWED_ROOT = REQUIRED | {"source_checksum", "source_profile", "target_player", "renderer", "outputs", "detection"}
+ALLOWED_ROOT = REQUIRED | {"source_checksum", "source_profile", "target_player", "renderer", "outputs", "detection", "environment"}
+ENVIRONMENT_STATES = {"ok", "degraded", "missing", "blocked"}
+ENVIRONMENT_VERDICTS = {"ok", "degraded", "blocked"}
+RENDERER_RUNGS = {1, 2, 3, 4, 5}
 TRANSFORM_KEYS = {"x", "y", "scale", "rotation", "opacity"}
 LAYER_REQUIRED = {
     "id",
@@ -231,6 +234,63 @@ def validate_effects(value: object, prefix: str, errors: list[str]) -> None:
         errors.append(f"{prefix}.sweep_angle must be a finite number.")
     if "blend_mode" in value and value["blend_mode"] not in EFFECT_BLEND_MODES:
         errors.append(f"{prefix}.blend_mode must be one of {sorted(EFFECT_BLEND_MODES)}.")
+
+
+def validate_environment(value: object, errors: list[str]) -> None:
+    prefix = "environment"
+    if not isinstance(value, dict):
+        errors.append(f"{prefix} must be an object.")
+        return
+    allowed = {"probed_on", "mode_verdict", "tool", "renderer_rung", "capabilities",
+               "degraded_features", "substitutions"}
+    unknown = sorted(set(value) - allowed)
+    if unknown:
+        errors.append(f"{prefix} contains invalid fields: {unknown}")
+    missing = sorted({"probed_on", "mode_verdict", "capabilities"} - set(value))
+    if missing:
+        errors.append(f"{prefix} is missing required fields: {missing}")
+    if not isinstance(value.get("probed_on"), str) or not value["probed_on"].strip():
+        errors.append(f"{prefix}.probed_on must be a non-empty string.")
+    if value.get("mode_verdict") not in ENVIRONMENT_VERDICTS:
+        errors.append(f"{prefix}.mode_verdict must be one of "
+                      f"{sorted(ENVIRONMENT_VERDICTS)}.")
+    if "renderer_rung" in value and value["renderer_rung"] not in RENDERER_RUNGS:
+        errors.append(f"{prefix}.renderer_rung must be 1 (SVG and CSS) through "
+                      "5 (rendererless).")
+    capabilities = value.get("capabilities")
+    if capabilities is not None:
+        if not isinstance(capabilities, list) or not capabilities:
+            errors.append(f"{prefix}.capabilities must be a non-empty array.")
+        else:
+            names = set()
+            for index, item in enumerate(capabilities):
+                label = f"{prefix}.capabilities[{index}]"
+                if not isinstance(item, dict):
+                    errors.append(f"{label} must be an object.")
+                    continue
+                if set(item) - {"capability", "state", "detail", "degrades"}:
+                    errors.append(f"{label} contains invalid fields.")
+                name = item.get("capability")
+                if not isinstance(name, str) or not name.strip():
+                    errors.append(f"{label}.capability must be a non-empty string.")
+                elif name in names:
+                    errors.append(f"{label}.capability repeats '{name}'.")
+                else:
+                    names.add(name)
+                if item.get("state") not in ENVIRONMENT_STATES:
+                    errors.append(f"{label}.state must be one of "
+                                  f"{sorted(ENVIRONMENT_STATES)}.")
+            # A recorded `missing` capability means the mode verdict cannot be `ok`.
+            if value.get("mode_verdict") == "ok" and any(
+                    isinstance(item, dict) and item.get("state") == "missing"
+                    for item in capabilities):
+                errors.append(f"{prefix}.mode_verdict is ok but a recorded capability "
+                              "is missing; the verdict and the capability list disagree.")
+    for key in ("degraded_features", "substitutions"):
+        item = value.get(key)
+        if item is not None and (not isinstance(item, list)
+                                 or not all(isinstance(entry, str) for entry in item)):
+            errors.append(f"{prefix}.{key} must be an array of strings.")
 
 
 def validate_recommendation(value: object, prefix: str, errors: list[str]) -> None:
@@ -490,6 +550,8 @@ def validate(data: object, check_files: bool = False, root: Path | None = None) 
                         errors.append(f"{prefix}.{key} must be a non-empty string.")
     if "detection" in data:
         validate_detection(data["detection"], errors)
+    if "environment" in data:
+        validate_environment(data["environment"], errors)
     layers = data.get("layers")
     if not isinstance(layers, list) or not layers:
         errors.append("layers must be a non-empty array.")

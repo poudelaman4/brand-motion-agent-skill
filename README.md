@@ -68,6 +68,7 @@ brand-motion-agent-skill/
 ├── references/
 │   ├── technique-selection.md       # Detection algorithm, gates, and ranking
 │   ├── utilities.md                 # Script invocations, flags, and limits
+│   ├── setup-and-environment.md     # Renderer ladder, per-mode needs, device notes
 │   ├── patterns/                    # Organic, geometric, monogram, wordmark, badge
 │   │   ├── line-drawing-and-trace.md# Draw-on, trace, and dash mechanics
 │   │   ├── separation-and-explode.md# Burst, axis, depth, and slice separation
@@ -89,6 +90,8 @@ Required for the core skill format:
 - Git
 - A filesystem-enabled AI coding agent
 - Python 3.10+ for the bundled utilities
+
+Run `python scripts/check_environment.py` to see what this machine can actually do before promising a render. It reports what is available, what is degraded, what is missing, and the exact install command, and it never installs anything itself.
 
 Recommended for production rendering and QA:
 
@@ -426,6 +429,7 @@ The ranked output is a shortlist, not a decision: **at most one primary techniqu
 | `validate_motion_spec.py` | Validate frame timing, bounds, easing, pivots, and final transforms | `python scripts/validate_motion_spec.py motion-manifest.json --check-files` |
 | `make_checkpoint_contact_sheet.py` | Extract exact frame checkpoints into a review sheet | `python scripts/make_checkpoint_contact_sheet.py --input render.mp4 --output sheet.jpg --frames 0,30,60,96,119` |
 | `compare_final_frame.py` | Compare a decoded poster frame with an approved reference | `python scripts/compare_final_frame.py --reference logo.png --encoded render.mp4 --frame 119 --tolerance 0.03` |
+| `check_environment.py` | Probe this machine: what is available, what is degraded, what is missing, and the install command for it | `python scripts/check_environment.py` |
 | `check_skill.py` | Dependency-free self-check of this package (frontmatter, body size, reference links across the package, schema, eval fixtures, manifest validator, template contract, profiler, taste gate, volatile-figure dates) | `python scripts/check_skill.py` |
 
 `references/utilities.md` documents every flag, what each script does not do, and which utility belongs to which task mode.
