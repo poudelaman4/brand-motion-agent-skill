@@ -5,6 +5,10 @@
 [![Claude Code Skill](https://img.shields.io/badge/Claude%20Code%20Skill-supported-6E56CF)](https://code.claude.com/docs/en/skills)
 [![License: MIT](https://img.shields.io/badge/License-MIT-10B981)](https://opensource.org/licenses/MIT)
 
+Listed on mcpservers.org
+
+[![Listed on mcpservers.org](https://mcpservers.org/badge.svg)](https://mcpservers.org/servers/poudelaman4/brand-motion-agent-skill)
+
 A **brand-safe logo animation agent skill**. It teaches a filesystem-enabled coding
 agent (Claude Code, Open Code, Cursor, and others) to animate an *already approved*
 logo without redrawing it: preserve canonical geometry and the final lockup, keep the
