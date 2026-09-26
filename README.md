@@ -100,7 +100,7 @@ Run `python scripts/check_environment.py` to see what this machine can actually 
 Recommended for production rendering and QA:
 
 - FFmpeg and FFprobe
-- Node.js and a renderer such as Remotion
+- One renderer: Node.js with Remotion, or `rsvg-convert` for frame-by-frame SVG rasterisation
 - An SVG editor or vector source for independent logo motion
 - Kdenlive/MLT for editorial timeline assembly
 - A browser/runtime test target for SVG, Lottie, or dotLottie output

@@ -40,7 +40,7 @@ Choose the highest rung the environment actually supports. Each rung down costs 
 |---:|---|---|---|---|
 | 1 | SVG and CSS | Nothing beyond a browser | Vector, resolution-independent, interactive | Web, product UI, Lottie source |
 | 2 | Lottie or dotLottie | A Lottie authoring tool, or hand-authored JSON | Vector, small, themeable, stateful | Web and app UI |
-| 3 | Remotion | Node 18+, a Chrome binary, the Remotion CLI | Video from a frame-driven React composition | Every video deliverable |
+| 3 | A frame renderer: Remotion, or an SVG rasteriser plus FFmpeg | Remotion: Node 18+, a Chrome binary, the Remotion CLI. SVG rasteriser: `rsvg-convert`, FFmpeg, a script driving both | Video from pre-rendered frames | Every video deliverable |
 | 4 | After Effects | A licensed install, plus a render pipeline | Video and broadcast masters | Broadcast, cinema, high-end delivery |
 | 5 | A rendererless pipeline | Nothing | A brief and a validated manifest only | Audit and plan modes |
 
@@ -48,13 +48,17 @@ Two rules govern the choice. First, **never climb a rung the environment cannot 
 
 Remotion needs a Chrome or Chromium binary because it renders in headless Chrome. It normally downloads its own on first run; on an offline or locked-down machine that download fails and rendering becomes `blocked`. Probe before promising a render.
 
+An SVG rasteriser such as `rsvg-convert` reaches the same rung without a browser: rasterise each frame to PNG, then encode with FFmpeg. It needs no Node and no Chrome, so it is the rung to prefer when the mark and wordmark are approved vector art and the motion is expressible in transforms, masks, and opacity. Its ceiling is what SVG itself can express — no JavaScript-driven state and no React composition. Prefer it over Remotion when the machine has no Chrome, and record the choice as a substitution only if it changes what the user sees, which it does not when both paths render the same spec.
+
+When installing without root, a package lands outside the default PATH. Extract it under `~/.local` and add it to `PATH`; the probe searches those locations, so a rootless install reports `ok` rather than `missing`.
+
 ## What each mode needs
 
 | Mode | Minimum | With the probe `ok` | With something `missing` |
 |---|---|---|---|
 | `audit` | Python 3.10+ | Full structural report | Report the gap and inspect the source by hand |
 | `plan` | Python 3.10+ | Profile, rank, and gate techniques | Write the brief from the source and the brief template |
-| `produce` | Python, Pillow, NumPy, FFmpeg, Node | Render, checkpoint, and verify | Manifest and brief only; rendering `blocked` |
+| `produce` | Python, Pillow, NumPy, FFmpeg, and one renderer (Node or `rsvg-convert`) | Render, checkpoint, and verify | Manifest and brief only; rendering `blocked` |
 | `interactive` | Node | State machines and runtime motion | Static states until a runtime exists |
 
 Only Pillow, NumPy, and SciPy are genuinely optional, and only for raster work. **Vector profiling needs nothing beyond the standard library**, so an SVG profiles on a bare Python install. That is deliberate: the most common input should never be blocked by a missing dependency.
@@ -70,8 +74,9 @@ A missing dependency must never end the task. Each has a documented fallback, an
 | SciPy | Component, hole, and stroke-width metrics report `null`; confidence drops | Raster technique ranking gets weaker; request a vector source |
 | FFmpeg | Deliver the manifest and the source; mark QA evidence `blocked` | No frame-accurate evidence |
 | Pillow and NumPy | Profile the vector only; treat a raster source as unprofiled | No technique ranking for raster input |
-| Node | Write the manifest and hand off; mark rendering `blocked` | No video from this machine |
-| A Chrome binary | Remotion may fetch one; if it cannot, use the Lottie or SVG rung | Smaller deliverable set |
+| Node | Render with an SVG rasteriser if the spec is expressible in transforms, masks, and opacity; otherwise write the manifest and mark rendering `blocked` | No React-driven composition |
+| A Chrome binary | Remotion may fetch one; if it cannot, use the SVG rasteriser, the Lottie, or the CSS rung | Smaller deliverable set |
+| `rsvg-convert` | Render with Remotion if it is present; otherwise use the Lottie or CSS rung | No video without a renderer |
 | potrace | Ask for an approved vector source rather than tracing | Traced contours are not authored geometry |
 
 Never substitute a lower-fidelity technique silently. A mask wipe delivered in place of a stroke draw-on must be recorded as a substitution with its reason, because the two produce visibly different results and the user may have approved the first.

@@ -48,30 +48,35 @@ INSTALL = {
     "pillow": {
         "pip": "python -m pip install \"Pillow>=9.0\"",
         "pipx": "pipx install Pillow",
+        "dnf": "sudo dnf install python3-pillow",
         "brew": "brew install python-pillow",
         "apt": "sudo apt-get install python3-pil",
         "win": "python -m pip install \"Pillow>=9.0\"",
     },
     "numpy": {
         "pip": "python -m pip install \"numpy>=1.23\"",
+        "dnf": "sudo dnf install python3-numpy",
         "brew": "brew install numpy",
         "apt": "sudo apt-get install python3-numpy",
         "win": "python -m pip install \"numpy>=1.23\"",
     },
     "scipy": {
         "pip": "python -m pip install \"scipy>=1.9\"",
+        "dnf": "sudo dnf install python3-scipy",
         "brew": "brew install scipy",
         "apt": "sudo apt-get install python3-scipy",
         "win": "python -m pip install \"scipy>=1.9\"",
     },
     "ffmpeg": {
+        "dnf": "sudo dnf install ffmpeg",
         "brew": "brew install ffmpeg",
         "apt": "sudo apt-get install ffmpeg",
         "win": "winget install Gyan.FFmpeg",
         "conda": "conda install -c conda-forge ffmpeg",
-        "note": "FFmpeg is the only hard external dependency for checkpoint evidence.",
+        "note": "FFmpeg is the only hard external dependency for checkpoint evidence. On Fedora it comes from RPM Fusion rather than the default repositories.",
     },
     "node": {
+        "dnf": "sudo dnf install nodejs",
         "brew": "brew install node",
         "apt": "sudo apt-get install -y nodejs npm",
         "win": "winget install OpenJS.NodeJS.LTS",
@@ -84,7 +89,17 @@ INSTALL = {
                 "must also be available. Licensing is per-company; verify before "
                 "commercial delivery.",
     },
+    "rsvg": {
+        "brew": "brew install librsvg",
+        "apt": "sudo apt-get install librsvg2-bin",
+        "dnf": "sudo dnf install librsvg2-tools",
+        "win": "winget install GNOME.GLib",
+        "note": "rsvg-convert is one rung of the renderer ladder. Without root, "
+                "extract the package to ~/.local and add it to PATH: "
+                "dnf download librsvg2-tools && rpm2cpio <pkg> | (cd ~/.local/rsvg && cpio -idm)",
+    },
     "potrace": {
+        "dnf": "sudo dnf install potrace",
         "brew": "brew install potrace",
         "apt": "sudo apt-get install potrace",
         "note": "Only needed to vectorize a flattened raster. Prefer an approved "
@@ -96,27 +111,49 @@ INSTALL = {
 MODE_REQUIREMENTS = {
     "audit": [],
     "plan": [],
-    "produce": ["pillow", "numpy", "ffmpeg", "node"],
+    "produce": ["pillow", "numpy", "ffmpeg"],
     "interactive": ["node"],
+}
+
+# A mode can be satisfied by any one of several alternatives. `produce` needs a
+# renderer, and there is more than one rung: Remotion needs node, the per-frame
+# SVG rung needs rsvg-convert. Requiring node outright would report a machine
+# that can render as blocked, which is the wrong answer.
+MODE_ANY_REQUIREMENTS = {
+    "produce": (["node", "rsvg"], "a renderer: Remotion (node) or rsvg-convert (rsvg)"),
 }
 
 
 def platform_key() -> str:
+    """The package manager this machine actually has.
+
+    Assuming apt on every Linux prints a command that cannot work on Fedora,
+    openSUSE, or Arch, and a wrong install command is worse than none because
+    it looks authoritative. Each manager is detected by its binary on PATH.
+    """
     system = platform.system()
     if system == "Darwin":
         return "brew"
-    if system == "Linux":
-        return "apt"
     if system == "Windows":
         return "win"
+    if system == "Linux":
+        for binary, key in (("dnf", "dnf"), ("apt-get", "apt"), ("pacman", "pacman"),
+                            ("zypper", "zypper"), ("apk", "apk")):
+            if shutil.which(binary):
+                return key
+        return "apt"
     return "pip"
+
 
 
 def install_hint(capability: str) -> list[str]:
     entry = INSTALL.get(capability)
     if not entry:
         return []
-    order = [platform_key(), "pip", "npm", "npx", "brew", "apt", "win", "conda", "pipx"]
+    # Only this machine's package manager is offered. Another distro's manager
+    # is not a fallback, it is a command that will fail, so it never appears.
+    # Language-level managers are cross-platform and are safe fallbacks.
+    order = [platform_key(), "pip", "npm", "npx", "conda", "pipx"]
     hints, seen = [], set()
     for key in order:
         value = entry.get(key)
@@ -170,11 +207,35 @@ def tool_version(command: list[str]) -> str:
         return "installed"
 
 
+ROOTLESS_DIRS = [
+    Path.home() / ".local" / "rsvg" / "usr" / "bin",
+    Path.home() / ".local" / "bin",
+    Path.home() / "bin",
+]
+
+
+def which_tool(tool: str) -> str | None:
+    """`shutil.which` plus the locations a no-root install lands in.
+
+    A package extracted without sudo does not reach the default PATH, so a tool
+    that is genuinely installed would otherwise be reported missing. That is the
+    difference between a blocked verdict and an honest `degraded` one.
+    """
+    found = shutil.which(tool)
+    if found:
+        return found
+    for directory in ROOTLESS_DIRS:
+        candidate = directory / tool
+        if candidate.is_file() and os.access(candidate, os.X_OK):
+            return str(candidate)
+    return None
+
+
 def check_tool(tool: str, capability: str, needed_for: str, probe: list[str] | None = None,
                absent_note: str = "", install_key: str | None = None) -> dict:
     """`install_key` lets a capability share another one's install command, which
     is how ffprobe is reported under its own name but installed as part of ffmpeg."""
-    path = shutil.which(tool)
+    path = which_tool(tool)
     if not path:
         return {"capability": capability, "state": MISSING, "detail": "not on PATH",
                 "needed_for": needed_for, "degrades": absent_note,
@@ -272,6 +333,11 @@ def probe_all() -> list:
                                "extraction still works with ffmpeg alone",
                    install_key="ffmpeg"),
         check_remotion(),
+        check_tool("rsvg-convert", "rsvg",
+                   "per-frame SVG rasterisation for the rsvg + ffmpeg rung",
+                   probe=["rsvg-convert", "--version"],
+                   absent_note="the rsvg + ffmpeg renderer rung is unavailable; render "
+                               "with Remotion instead, or agree a lower-fidelity rung"),
         check_tool("potrace", "potrace", "vectorizing a flattened raster",
                    absent_note="a flattened raster stays flattened; ask for a vector "
                                "source rather than tracing"),
@@ -292,6 +358,14 @@ def mode_verdict(capabilities: list, mode: str) -> dict:
             unmet.append(name)
         elif item["state"] in (DEGRADED, BLOCKED):
             degraded.append(name)
+    # Any-of group: satisfied when one alternative is OK. A degraded alternative
+    # does not fail the mode as long as another one works, because that is the
+    # whole point of having two renderer rungs.
+    alternatives, label = MODE_ANY_REQUIREMENTS.get(mode, ([], ""))
+    if alternatives:
+        states = [by_name.get(name, {}).get("state") for name in alternatives]
+        if OK not in states:
+            unmet.append(label)
     if unmet:
         verdict = "blocked"
     elif degraded:
@@ -312,7 +386,7 @@ def self_test() -> int:
         failures.append("probe returned no capabilities")
     names = {item["capability"] for item in capabilities}
     for required in ("python", "pillow", "numpy", "scipy", "ffmpeg", "ffprobe",
-                     "remotion", "potrace", "disk", "hardware"):
+                     "remotion", "rsvg", "potrace", "disk", "hardware"):
         if required not in names:
             failures.append(f"probe did not report '{required}'")
     for item in capabilities:
