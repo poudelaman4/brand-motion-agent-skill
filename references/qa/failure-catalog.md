@@ -31,6 +31,17 @@
 **Cause:** low-alpha ringing, residual pixels, crop contamination, or an already-upscaled raster layer is being crossfaded with cleaner vector or whole-mark geometry.
 **Repair:** prefer approved vector geometry; otherwise rebuild from original-resolution pixels, prune residual components, inspect multiple backgrounds, render direct start/mid/end stills, decode the encoded transition frames, and fall back to the clean vector or whole-mark reveal instead of hiding the ghost with effects.
 
+### Parts separated in a flattened raster
+
+**Symptom:** a wordmark never resolves; letters arrive as unrecognizable fragments, and no checkpoint frame reads as the name.
+**Repair:** fall back to a directional mask wipe for the whole word, or work from an approved manual part list. Never segment a flattened wordmark per frame; record the parts as `blocked` until they are approved, per `patterns/wordmark-and-lockup.md` and `patterns/separation-and-explode.md`.
+
+### Symmetry-driven recommendation from an ambiguous detection
+
+**Symptom:** a symmetry-dependent recommendation fires on a mark with no real symmetry, such as a uniform blob that scores symmetric on every axis.
+**Cause:** the raw mirror score measures the best axis against 1.0 rather than against the mean score across all sampled axes, so a shape that matches itself equally in every direction reads as strongly symmetric.
+**Repair:** subtract the mean axis baseline before accepting a symmetry value, cross-check the reflected half against the raster ink mask, and label the result `inferred` or `provisional` until it is confirmed visually. Halve every symmetry-driven rule while the detection stays ambiguous, per `technique-selection.md`.
+
 ## Motion failures
 
 ### Detached pivot
@@ -52,6 +63,18 @@
 
 **Symptom:** glow, particles, glitch, or bounce obscure the silhouette without expressing the brand.
 **Repair:** remove the effect or reduce it to a subordinate accent.
+
+### Dash array shorter than the path
+
+**Symptom:** a second line appears behind the drawing stroke, and the contour reads as doubled once the reveal completes.
+**Cause:** a `stroke-dasharray` below the measured path length re-dashes the remainder as a fresh dash, so the tail of the path is drawn a second time.
+**Repair:** measure each subpath, set `dasharray` to the measured length, and confirm at 100% reveal that exactly one line covers each subpath. Never estimate a length from the bounding box; read `motion-foundations.md` for the dash arithmetic.
+
+### Draw starts on the axis of symmetry
+
+**Symptom:** a seam or a blunt lump sits on the mirror line of a closed symmetric mark, and the contour looks broken at 200% zoom.
+**Cause:** the reveal begins and ends at the same point on the closed subpath, so the two caps coincide instead of joining.
+**Repair:** move the start to the apex and draw the mirrored halves in sequence, or split the mark into two subpaths. Prefer a free degree-one endpoint ahead of any mirror line.
 
 ## Typography failures
 
@@ -81,6 +104,12 @@
 
 **Symptom:** full-canvas transparent layers exhaust memory or produce decode warnings.
 **Repair:** use tight crops, explicit bounds, fewer simultaneous alpha surfaces, and conservative concurrency.
+
+### Non-deterministic render
+
+**Symptom:** two renders of the same frame range differ; particles, grain, or noise change between passes and the poster frame will not reproduce.
+**Cause:** runtime randomness, wall-clock time, or a module-scope counter supplies positions, lifetimes, and turbulence phases instead of a value derived from the frame number.
+**Repair:** derive every stochastic value from the frame number and a stable seed string, bake the sample table, and render the same range twice to confirm identical output. Treat runtime randomness as `blocked` in a frame-driven renderer, per `patterns/matter-and-particles.md`.
 
 ## Repair checklist
 

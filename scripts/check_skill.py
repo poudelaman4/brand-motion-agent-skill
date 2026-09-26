@@ -9,6 +9,7 @@ CI or as a pre-commit sanity gate. It checks:
 - Referenced relative paths in backticks inside SKILL.md exist.
 - Eval fixture files referenced by the evaluation cases point at real paths.
 - schemas/motion-spec.schema.json parses and has a sane root.
+- scripts/profile_logo.py passes its dependency-free self-test.
 - evals/evals.json and evals/trigger-queries.json parse and have expected shape.
 - The bundled manifest validator passes on the valid fixture and fails on the
   invalid fixture (a behavioral smoke test of validate_motion_spec.py).
@@ -167,11 +168,39 @@ def check_manifest_validator() -> None:
     good = subprocess.run([sys.executable, str(script), str(valid)], capture_output=True, text=True)
     if good.returncode != 0:
         fail(f"valid-motion-spec.json should PASS but returned {good.returncode}: {good.stdout.strip()}")
+    advanced = ROOT / "evals" / "files" / "valid-advanced-spec.json"
+    if not advanced.exists():
+        fail("expected file missing for validator smoke test: evals/files/valid-advanced-spec.json")
+    else:
+        result = subprocess.run([sys.executable, str(script), str(advanced)],
+                                capture_output=True, text=True)
+        if result.returncode != 0:
+            fail(f"valid-advanced-spec.json should PASS but returned {result.returncode}: "
+                 f"{result.stdout.strip()}")
+        else:
+            note("advanced manifest validates, so the stroke, separation, mask, and "
+                 "detection channels stay exercised.")
     bad = subprocess.run([sys.executable, str(script), str(invalid)], capture_output=True, text=True)
     if bad.returncode == 0:
         fail("invalid-motion-spec.json should FAIL but the validator passed it.")
     else:
         note("manifest validator correctly passes the valid fixture and rejects the invalid one.")
+
+
+def check_profiler() -> None:
+    script = ROOT / "scripts" / "profile_logo.py"
+    fixture = ROOT / "evals" / "files" / "layered-mark.svg"
+    for path in (script, fixture):
+        if not path.exists():
+            fail(f"expected file missing for profiler smoke test: {path.relative_to(ROOT)}")
+    if not (script.exists() and fixture.exists()):
+        return
+    result = subprocess.run([sys.executable, str(script), "--self-test"],
+                            capture_output=True, text=True)
+    if result.returncode != 0:
+        fail(f"profiler self-test failed: {result.stderr.strip() or result.stdout.strip()}")
+    else:
+        note("profiler self-test passes on the layered vector fixture.")
 
 
 def main() -> int:
@@ -181,6 +210,7 @@ def main() -> int:
     check_schema()
     check_evals()
     check_manifest_validator()
+    check_profiler()
 
     for message in NOTES:
         print(f"note: {message}")

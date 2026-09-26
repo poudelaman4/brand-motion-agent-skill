@@ -2,7 +2,10 @@
   "name": "example-logo-reveal",
   "fps": 30,
   "duration_frames": 120,
-  "canvas": {"width": 1080, "height": 1080},
+  "canvas": {
+    "width": 1080,
+    "height": 1080
+  },
   "source_reference": "assets/approved-logo.png",
   "source_checksum": "sha256:replace-me",
   "source_profile": "sRGB",
@@ -11,45 +14,250 @@
   "hold_start_frame": 96,
   "poster_frame": 119,
   "reduced_motion": "Show the approved final state immediately.",
-  "background_variants": ["alpha", "white", "brand"],
+  "background_variants": [
+    "alpha",
+    "white",
+    "brand"
+  ],
   "outputs": [
-    {"id": "square-alpha", "canvas": {"width": 1080, "height": 1080}, "background": "alpha", "path": "renders/logo-alpha.mov"},
-    {"id": "square-white", "canvas": {"width": 1080, "height": 1080}, "background": "white", "path": "renders/logo-white.mp4"}
+    {
+      "id": "square-alpha",
+      "canvas": {
+        "width": 1080,
+        "height": 1080
+      },
+      "background": "alpha",
+      "path": "renders/logo-alpha.mov"
+    },
+    {
+      "id": "square-white",
+      "canvas": {
+        "width": 1080,
+        "height": 1080
+      },
+      "background": "white",
+      "path": "renders/logo-white.mp4"
+    }
   ],
   "target_player": "web and desktop video",
   "renderer": "Remotion",
+  "detection": {
+    "tool": "scripts/profile_logo.py",
+    "capability_rung": 4,
+    "complexity": 38.0,
+    "complexity_band": "moderate",
+    "confidence": "inferred",
+    "primary": {
+      "technique": "mask_wipe",
+      "scenario_id": "WORD-02",
+      "score": 0.35,
+      "reference": "references/patterns/wordmark-and-lockup.md"
+    },
+    "supporting": [
+      {
+        "technique": "separation_explode",
+        "scenario_id": "SEP-01",
+        "score": 0.4,
+        "reference": "references/patterns/separation-and-explode.md"
+      }
+    ],
+    "blocked": [
+      {
+        "technique": "line_draw_on",
+        "scenario_id": "LINE-01",
+        "code": "LIVE_TEXT",
+        "detail": "live text nodes break per-path timing",
+        "remedy": "convert text to outlines before animating"
+      }
+    ],
+    "notes": [
+      "Record why a recommendation was overridden rather than silently replacing it."
+    ]
+  },
   "layers": [
     {
       "id": "b",
       "role": "core-symbol",
       "source": "layers/b.png",
-      "bounds": [0.410, 0.260, 0.614, 0.554],
-      "pivot": [0.511, 0.549],
+      "bounds": [
+        0.41,
+        0.26,
+        0.614,
+        0.554
+      ],
+      "pivot": [
+        0.511,
+        0.549
+      ],
       "z_index": 4,
       "start_frame": 0,
       "duration_frames": 30,
-      "from": {"x": 0, "y": 0.024, "scale": 0.86, "rotation": 0, "opacity": 0},
-      "to": {"x": 0, "y": 0, "scale": 1, "rotation": 0, "opacity": 1},
+      "from": {
+        "x": 0,
+        "y": 0.024,
+        "scale": 0.86,
+        "rotation": 0,
+        "opacity": 0
+      },
+      "to": {
+        "x": 0,
+        "y": 0,
+        "scale": 1,
+        "rotation": 0,
+        "opacity": 1
+      },
       "easing": "enter",
       "confidence": "observed",
       "locked": false,
-      "final_state": true
+      "final_state": true,
+      "technique": "separation_explode",
+      "scenario_id": "SEP-03",
+      "separation": {
+        "axis": [
+          0,
+          1
+        ],
+        "distance": 0.18,
+        "depth": -0.4,
+        "order_source": "z_order"
+      }
     },
     {
       "id": "wordmark-b",
       "role": "wordmark-letter",
       "source": "layers/wordmark-b.png",
-      "bounds": [0.194, 0.688, 0.282, 0.763],
-      "pivot": [0.237, 0.763],
+      "bounds": [
+        0.194,
+        0.688,
+        0.282,
+        0.763
+      ],
+      "pivot": [
+        0.237,
+        0.763
+      ],
       "z_index": 7,
       "start_frame": 30,
       "duration_frames": 22,
-      "from": {"x": -0.002, "y": 0.016, "scale": 0.86, "rotation": 0, "opacity": 0},
-      "to": {"x": 0, "y": 0, "scale": 1, "rotation": 0, "opacity": 1},
+      "from": {
+        "x": -0.002,
+        "y": 0.016,
+        "scale": 0.86,
+        "rotation": 0,
+        "opacity": 0
+      },
+      "to": {
+        "x": 0,
+        "y": 0,
+        "scale": 1,
+        "rotation": 0,
+        "opacity": 1
+      },
       "easing": "enter",
-      "confidence": "observed",
+      "confidence": "inferred",
       "locked": false,
-      "final_state": true
+      "final_state": true,
+      "technique": "kinetic_typography",
+      "scenario_id": "KINE-01",
+      "mask": {
+        "type": "vector",
+        "angle": 90,
+        "feather": 0,
+        "from_pct": 0,
+        "to_pct": 100
+      }
+    },
+    {
+      "id": "ring-trace",
+      "role": "badge-ring-stroke",
+      "source": "layers/ring.svg#ring",
+      "bounds": [
+        0.5,
+        0.5,
+        0.88,
+        0.88
+      ],
+      "pivot": [
+        0.69,
+        0.69
+      ],
+      "z_index": 2,
+      "start_frame": 0,
+      "duration_frames": 42,
+      "from": {
+        "x": 0,
+        "y": 0,
+        "scale": 1,
+        "rotation": 0,
+        "opacity": 1
+      },
+      "to": {
+        "x": 0,
+        "y": 0,
+        "scale": 1,
+        "rotation": 0,
+        "opacity": 1
+      },
+      "easing": "draw",
+      "confidence": "inferred",
+      "locked": true,
+      "final_state": true,
+      "technique": "line_draw_on",
+      "scenario_id": "LINE-01",
+      "stroke": {
+        "path_length": 2411.7,
+        "dasharray": 2413,
+        "dashoffset_from": 2411.7,
+        "dashoffset_to": 0,
+        "linecap": "round",
+        "linejoin": "round",
+        "order": 0,
+        "closed": true,
+        "pen_lift": false
+      }
+    },
+    {
+      "id": "mark-sweep",
+      "role": "surface-highlight",
+      "source": "layers/approved-logo.png",
+      "bounds": [
+        0.41,
+        0.26,
+        0.614,
+        0.554
+      ],
+      "pivot": [
+        0.511,
+        0.549
+      ],
+      "z_index": 5,
+      "start_frame": 96,
+      "duration_frames": 18,
+      "from": {
+        "x": 0,
+        "y": 0,
+        "scale": 1,
+        "rotation": 0,
+        "opacity": 1
+      },
+      "to": {
+        "x": 0,
+        "y": 0,
+        "scale": 1,
+        "rotation": 0,
+        "opacity": 1
+      },
+      "easing": "enter",
+      "confidence": "provisional",
+      "locked": false,
+      "final_state": false,
+      "technique": "gradient_sweep",
+      "scenario_id": "PREM-03",
+      "effects": {
+        "sweep_type": "linear",
+        "sweep_angle": 105,
+        "blend_mode": "screen"
+      }
     }
   ]
 }

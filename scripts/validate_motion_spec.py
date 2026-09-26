@@ -18,9 +18,9 @@ REQUIRED = {
     "poster_frame",
     "layers",
 }
-ALLOWED_ROOT = REQUIRED | {"source_checksum", "source_profile", "target_player", "renderer", "outputs"}
+ALLOWED_ROOT = REQUIRED | {"source_checksum", "source_profile", "target_player", "renderer", "outputs", "detection"}
 TRANSFORM_KEYS = {"x", "y", "scale", "rotation", "opacity"}
-LAYER_KEYS = {
+LAYER_REQUIRED = {
     "id",
     "role",
     "source",
@@ -36,8 +36,42 @@ LAYER_KEYS = {
     "locked",
     "final_state",
 }
-EASING = {"settle", "enter", "draw", "organic", "snap", "play", "path-linear"}
+# Optional per-layer channels for the advanced technique families. A stroke
+# reveal, an explode vector, a true path morph, a mask wipe, and a bounded
+# effect set are not transforms, so each carries its own channel instead of
+# overloading x/y/scale/rotation/opacity.
+LAYER_OPTIONAL = {
+    "technique",
+    "scenario_id",
+    "stroke",
+    "separation",
+    "morph",
+    "mask",
+    "effects",
+}
+LAYER_KEYS = LAYER_REQUIRED | LAYER_OPTIONAL
+EASING = {"settle", "enter", "draw", "organic", "snap", "play", "path-linear", "morph"}
 CONFIDENCE = {"observed", "inferred", "provisional", "blocked"}
+DETECTION_CONFIDENCE = {"inferred", "provisional", "blocked"}
+TECHNIQUES = {
+    "line_draw_on", "multi_stroke_trace", "kinetic_typography", "mask_wipe",
+    "mask_wipe_mark", "circular_sweep", "particle_dissolve", "morph_shape",
+    "separation_explode", "separation_ordered", "geometric_construction",
+    "extrusion_3d", "bounce_elastic", "orbit_rotate", "orbit_rotate_badge",
+    "gradient_sweep", "idle_loop", "scroll_scrub", "reduced_motion",
+}
+COMPLEXITY_BANDS = {"atomic", "geometric", "moderate", "detailed", "illustrative"}
+STROKE_KEYS = {"path_length", "dasharray", "dashoffset_from", "dashoffset_to",
+               "linecap", "linejoin", "order", "closed", "pen_lift"}
+SEPARATION_KEYS = {"axis", "distance", "depth", "order_source"}
+MORPH_KEYS = {"path_from", "path_to", "correspondence", "segment_count"}
+MASK_KEYS = {"type", "angle", "feather", "from_pct", "to_pct"}
+EFFECT_KEYS = {"particle_count", "seed", "lifetime_frames",
+               "turbulence_base_frequency", "turbulence_octaves",
+               "sweep_type", "sweep_angle", "blend_mode"}
+EFFECT_SWEEP_TYPES = {"linear", "radial", "conic", "foil"}
+EFFECT_BLEND_MODES = {"normal", "screen", "overlay", "add", "multiply"}
+MASK_TYPES = {"alpha", "luma", "vector", "clip", "conic", "band", "wedge"}
 
 
 def is_number(value: object) -> bool:
@@ -68,6 +102,192 @@ def validate_transform(value: object, prefix: str, errors: list[str]) -> None:
         errors.append(f"{prefix}.scale must be positive.")
     if is_number(value.get("opacity")) and not 0 <= value["opacity"] <= 1:
         errors.append(f"{prefix}.opacity must be between 0 and 1.")
+
+
+def validate_stroke(value: object, prefix: str, errors: list[str]) -> None:
+    if not isinstance(value, dict):
+        errors.append(f"{prefix} must be an object.")
+        return
+    unknown = sorted(set(value) - STROKE_KEYS)
+    if unknown:
+        errors.append(f"{prefix} contains invalid fields: {unknown}")
+    for key in ("path_length", "dasharray", "dashoffset_from", "dashoffset_to"):
+        if not is_number(value.get(key)):
+            errors.append(f"{prefix}.{key} must be a finite number.")
+    if is_number(value.get("path_length")) and value["path_length"] <= 0:
+        errors.append(f"{prefix}.path_length must be positive.")
+    # A dasharray shorter than the path re-dashes mid-draw and shows a second
+    # line, which is the most common draw-on defect.
+    if is_number(value.get("dasharray")) and is_number(value.get("path_length")) \
+            and value["dasharray"] < value["path_length"]:
+        errors.append(f"{prefix}.dasharray must be greater than or equal to path_length.")
+    for key in ("linecap", "linejoin"):
+        if key in value and value[key] not in {"butt", "round", "square", "miter", "bevel"}:
+            errors.append(f"{prefix}.{key} is not a valid value.")
+    for key in ("order",):
+        if key in value and (not is_int(value[key]) or value[key] < 0):
+            errors.append(f"{prefix}.{key} must be a non-negative integer.")
+    for key in ("closed", "pen_lift"):
+        if key in value and not isinstance(value[key], bool):
+            errors.append(f"{prefix}.{key} must be boolean.")
+
+
+def validate_separation(value: object, prefix: str, errors: list[str]) -> None:
+    if not isinstance(value, dict):
+        errors.append(f"{prefix} must be an object.")
+        return
+    unknown = sorted(set(value) - SEPARATION_KEYS)
+    if unknown:
+        errors.append(f"{prefix} contains invalid fields: {unknown}")
+    axis = value.get("axis")
+    if (not isinstance(axis, list) or len(axis) != 2
+            or not all(is_number(item) for item in axis)):
+        errors.append(f"{prefix}.axis must contain two finite numbers.")
+    if not is_number(value.get("distance")):
+        errors.append(f"{prefix}.distance must be a finite number.")
+    if "depth" in value and (not is_number(value["depth"]) or not -1 <= value["depth"] <= 1):
+        errors.append(f"{prefix}.depth must be between -1 and 1.")
+    if "order_source" in value and value["order_source"] not in {"authored", "z_order", "explicit"}:
+        errors.append(f"{prefix}.order_source is not a valid value.")
+
+
+def validate_morph(value: object, prefix: str, errors: list[str]) -> None:
+    if not isinstance(value, dict):
+        errors.append(f"{prefix} must be an object.")
+        return
+    unknown = sorted(set(value) - MORPH_KEYS)
+    if unknown:
+        errors.append(f"{prefix} contains invalid fields: {unknown}")
+    for key in ("path_from", "path_to"):
+        if not isinstance(value.get(key), str) or not value[key].strip():
+            errors.append(f"{prefix}.{key} must be a non-empty string.")
+    if "correspondence" in value and value["correspondence"] not in {"matched", "resampled"}:
+        errors.append(f"{prefix}.correspondence is not a valid value.")
+    if "segment_count" in value and (not is_int(value["segment_count"]) or value["segment_count"] < 3):
+        errors.append(f"{prefix}.segment_count must be an integer of at least 3.")
+
+
+def validate_mask(value: object, prefix: str, errors: list[str]) -> None:
+    if not isinstance(value, dict):
+        errors.append(f"{prefix} must be an object.")
+        return
+    unknown = sorted(set(value) - MASK_KEYS)
+    if unknown:
+        errors.append(f"{prefix} contains invalid fields: {unknown}")
+    if value.get("type") not in MASK_TYPES:
+        errors.append(f"{prefix}.type must be one of {sorted(MASK_TYPES)}.")
+    for key in ("angle",):
+        if key in value and not is_number(value[key]):
+            errors.append(f"{prefix}.{key} must be a finite number.")
+    if "feather" in value and (not is_number(value["feather"]) or value["feather"] < 0):
+        errors.append(f"{prefix}.feather must be a non-negative number.")
+    for key in ("from_pct", "to_pct"):
+        if key in value and (not is_number(value[key]) or not 0 <= value[key] <= 100):
+            errors.append(f"{prefix}.{key} must be between 0 and 100.")
+
+
+def validate_effects(value: object, prefix: str, errors: list[str]) -> None:
+    if not isinstance(value, dict):
+        errors.append(f"{prefix} must be an object.")
+        return
+    unknown = sorted(set(value) - EFFECT_KEYS)
+    if unknown:
+        errors.append(f"{prefix} contains invalid fields: {unknown}")
+    if "particle_count" in value and (not is_int(value["particle_count"])
+                                      or not 0 <= value["particle_count"] <= 400):
+        errors.append(f"{prefix}.particle_count must be an integer between 0 and 400.")
+    if "seed" in value and (not isinstance(value["seed"], str) or not value["seed"].strip()):
+        errors.append(f"{prefix}.seed must be a non-empty string.")
+    if "lifetime_frames" in value and (not is_int(value["lifetime_frames"])
+                                       or not 1 <= value["lifetime_frames"] <= 120):
+        errors.append(f"{prefix}.lifetime_frames must be an integer between 1 and 120.")
+    if "turbulence_base_frequency" in value and (not is_number(value["turbulence_base_frequency"])
+                                                 or not 0 < value["turbulence_base_frequency"] <= 1):
+        errors.append(f"{prefix}.turbulence_base_frequency must be greater than 0 and at most 1.")
+    if "turbulence_octaves" in value and (not is_int(value["turbulence_octaves"])
+                                         or not 1 <= value["turbulence_octaves"] <= 8):
+        errors.append(f"{prefix}.turbulence_octaves must be an integer between 1 and 8.")
+    if "sweep_type" in value and value["sweep_type"] not in EFFECT_SWEEP_TYPES:
+        errors.append(f"{prefix}.sweep_type must be one of {sorted(EFFECT_SWEEP_TYPES)}.")
+    if "sweep_angle" in value and not is_number(value["sweep_angle"]):
+        errors.append(f"{prefix}.sweep_angle must be a finite number.")
+    if "blend_mode" in value and value["blend_mode"] not in EFFECT_BLEND_MODES:
+        errors.append(f"{prefix}.blend_mode must be one of {sorted(EFFECT_BLEND_MODES)}.")
+
+
+def validate_recommendation(value: object, prefix: str, errors: list[str]) -> None:
+    if not isinstance(value, dict):
+        errors.append(f"{prefix} must be an object.")
+        return
+    if set(value) - {"technique", "scenario_id", "score", "reference"}:
+        errors.append(f"{prefix} contains invalid fields.")
+    if value.get("technique") not in TECHNIQUES:
+        errors.append(f"{prefix}.technique must be a known technique key.")
+    if not isinstance(value.get("scenario_id"), str) or not value["scenario_id"].strip():
+        errors.append(f"{prefix}.scenario_id must be a non-empty string.")
+    if "score" in value and not is_number(value["score"]):
+        errors.append(f"{prefix}.score must be a finite number.")
+    if "reference" in value and (not isinstance(value["reference"], str) or not value["reference"].strip()):
+        errors.append(f"{prefix}.reference must be a non-empty string.")
+
+
+def validate_detection(value: object, errors: list[str]) -> None:
+    prefix = "detection"
+    if not isinstance(value, dict):
+        errors.append(f"{prefix} must be an object.")
+        return
+    allowed = {"tool", "capability_rung", "complexity", "complexity_band", "confidence",
+               "primary", "supporting", "blocked", "notes"}
+    unknown = sorted(set(value) - allowed)
+    if unknown:
+        errors.append(f"{prefix} contains invalid fields: {unknown}")
+    missing = sorted({"confidence", "primary", "supporting"} - set(value))
+    if missing:
+        errors.append(f"{prefix} is missing required fields: {missing}")
+    # A fingerprint-derived recommendation is inferred at best, and provisional
+    # on a flattened raster. It is never observed.
+    if value.get("confidence") not in DETECTION_CONFIDENCE:
+        errors.append(f"{prefix}.confidence must be one of {sorted(DETECTION_CONFIDENCE)}; "
+                      "a detection result is never observed.")
+    if "capability_rung" in value and (not is_int(value["capability_rung"])
+                                       or not 0 <= value["capability_rung"] <= 8):
+        errors.append(f"{prefix}.capability_rung must be an integer between 0 and 8.")
+    if "complexity" in value and (not is_number(value["complexity"])
+                                  or not 0 <= value["complexity"] <= 100):
+        errors.append(f"{prefix}.complexity must be a number between 0 and 100.")
+    if "complexity_band" in value and value["complexity_band"] not in COMPLEXITY_BANDS:
+        errors.append(f"{prefix}.complexity_band must be one of {sorted(COMPLEXITY_BANDS)}.")
+    if "primary" in value:
+        validate_recommendation(value["primary"], f"{prefix}.primary", errors)
+    supporting = value.get("supporting")
+    if supporting is not None:
+        if not isinstance(supporting, list):
+            errors.append(f"{prefix}.supporting must be an array.")
+        else:
+            # One primary plus at most two supporting gestures.
+            if len(supporting) > 2:
+                errors.append(f"{prefix}.supporting must hold at most two gestures.")
+            for index, item in enumerate(supporting):
+                validate_recommendation(item, f"{prefix}.supporting[{index}]", errors)
+    blocked = value.get("blocked")
+    if blocked is not None:
+        if not isinstance(blocked, list):
+            errors.append(f"{prefix}.blocked must be an array.")
+        else:
+            for index, item in enumerate(blocked):
+                label = f"{prefix}.blocked[{index}]"
+                if not isinstance(item, dict):
+                    errors.append(f"{label} must be an object.")
+                    continue
+                if set(item) - {"technique", "scenario_id", "code", "detail", "remedy"}:
+                    errors.append(f"{label} contains invalid fields.")
+                for key in ("technique", "code", "detail"):
+                    if not isinstance(item.get(key), str) or not item[key].strip():
+                        errors.append(f"{label}.{key} must be a non-empty string.")
+    notes = value.get("notes")
+    if notes is not None and (not isinstance(notes, list)
+                              or not all(isinstance(item, str) for item in notes)):
+        errors.append(f"{prefix}.notes must be an array of strings.")
 
 
 def validate(data: object, check_files: bool = False, root: Path | None = None) -> list[str]:
@@ -132,6 +352,8 @@ def validate(data: object, check_files: bool = False, root: Path | None = None) 
                 for key in ("background", "path"):
                     if not isinstance(output.get(key), str) or not output[key].strip():
                         errors.append(f"{prefix}.{key} must be a non-empty string.")
+    if "detection" in data:
+        validate_detection(data["detection"], errors)
     layers = data.get("layers")
     if not isinstance(layers, list) or not layers:
         errors.append("layers must be a non-empty array.")
@@ -142,8 +364,11 @@ def validate(data: object, check_files: bool = False, root: Path | None = None) 
         if not isinstance(layer, dict):
             errors.append(f"{prefix} must be an object.")
             continue
-        if set(layer) != LAYER_KEYS:
-            errors.append(f"{prefix} must contain exactly {sorted(LAYER_KEYS)}.")
+        if set(layer) - LAYER_KEYS:
+            errors.append(f"{prefix} contains invalid fields: {sorted(set(layer) - LAYER_KEYS)}.")
+        if LAYER_REQUIRED - set(layer):
+            errors.append(f"{prefix} is missing required fields: "
+                          f"{sorted(LAYER_REQUIRED - set(layer))}.")
         for key in ("id", "role", "source", "easing"):
             if not isinstance(layer.get(key), str) or not layer[key].strip():
                 errors.append(f"{prefix}.{key} must be a non-empty string.")
@@ -182,6 +407,27 @@ def validate(data: object, check_files: bool = False, root: Path | None = None) 
             errors.append(f"{prefix}.locked must be boolean.")
         if not isinstance(layer.get("final_state"), bool):
             errors.append(f"{prefix}.final_state must be boolean.")
+        if "technique" in layer and layer["technique"] not in TECHNIQUES:
+            errors.append(f"{prefix}.technique must be a known technique key.")
+        if "scenario_id" in layer and (not isinstance(layer["scenario_id"], str)
+                                       or not layer["scenario_id"].strip()):
+            errors.append(f"{prefix}.scenario_id must be a non-empty string.")
+        if "stroke" in layer:
+            validate_stroke(layer["stroke"], f"{prefix}.stroke", errors)
+        if "separation" in layer:
+            validate_separation(layer["separation"], f"{prefix}.separation", errors)
+        if "morph" in layer:
+            validate_morph(layer["morph"], f"{prefix}.morph", errors)
+        if "mask" in layer:
+            validate_mask(layer["mask"], f"{prefix}.mask", errors)
+        if "effects" in layer:
+            validate_effects(layer["effects"], f"{prefix}.effects", errors)
+        # A stroke reveal and a true morph both resolve to the canonical final
+        # transform, so neither may borrow the transform channel to animate.
+        if "stroke" in layer and layer.get("easing") not in {"draw", "path-linear", "enter", "settle"}:
+            errors.append(f"{prefix}.easing must be draw or path-linear for a stroke layer.")
+        if "morph" in layer and layer.get("easing") != "morph":
+            errors.append(f"{prefix}.easing must be morph for a morph layer.")
         to = layer.get("to")
         if layer.get("final_state") is True and isinstance(to, dict) and set(to) == TRANSFORM_KEYS and all(is_number(to.get(key)) for key in TRANSFORM_KEYS):
             canonical = {"x": 0, "y": 0, "scale": 1, "rotation": 0, "opacity": 1}

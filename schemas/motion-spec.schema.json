@@ -52,7 +52,8 @@
       "type": "array",
       "minItems": 1,
       "items": {"$ref": "#/$defs/layer"}
-    }
+    },
+    "detection": {"$ref": "#/$defs/detection"}
   },
   "$defs": {
     "canvas": {
@@ -61,6 +62,48 @@
       "properties": {
         "width": {"type": "integer", "minimum": 1},
         "height": {"type": "integer", "minimum": 1}
+      },
+      "additionalProperties": false
+    },
+    "detection": {
+      "type": "object",
+      "description": "Structural profile and ranked recommendation from scripts/profile_logo.py. Confidence is inferred on a vector source and provisional on a flattened raster; it is never observed.",
+      "required": ["confidence", "primary", "supporting"],
+      "properties": {
+        "tool": {"type": "string", "minLength": 1},
+        "capability_rung": {"type": "integer", "minimum": 0, "maximum": 8},
+        "complexity": {"type": "number", "minimum": 0, "maximum": 100},
+        "complexity_band": {"enum": ["atomic", "geometric", "moderate", "detailed", "illustrative"]},
+        "confidence": {"enum": ["inferred", "provisional", "blocked"]},
+        "primary": {"$ref": "#/$defs/recommendation"},
+        "supporting": {"type": "array", "items": {"$ref": "#/$defs/recommendation"}},
+        "blocked": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["technique", "code", "detail"],
+            "properties": {
+              "technique": {"type": "string", "minLength": 1},
+              "scenario_id": {"type": "string", "minLength": 1},
+              "code": {"type": "string", "minLength": 1},
+              "detail": {"type": "string", "minLength": 1},
+              "remedy": {"type": "string"}
+            },
+            "additionalProperties": false
+          }
+        },
+        "notes": {"type": "array", "items": {"type": "string"}}
+      },
+      "additionalProperties": false
+    },
+    "recommendation": {
+      "type": "object",
+      "required": ["technique", "scenario_id"],
+      "properties": {
+        "technique": {"$ref": "#/$defs/technique"},
+        "scenario_id": {"type": "string", "minLength": 1},
+        "score": {"type": "number"},
+        "reference": {"type": "string", "minLength": 1}
       },
       "additionalProperties": false
     },
@@ -73,6 +116,75 @@
         "scale": {"type": "number", "exclusiveMinimum": 0},
         "rotation": {"type": "number"},
         "opacity": {"type": "number", "minimum": 0, "maximum": 1}
+      },
+      "additionalProperties": false
+    },
+    "stroke": {
+      "type": "object",
+      "description": "Draw-on channel. A stroke layer keeps a canonical final transform; the reveal is carried by dasharray and dashoffset, never by the transform.",
+      "required": ["path_length", "dasharray", "dashoffset_from", "dashoffset_to"],
+      "properties": {
+        "path_length": {"type": "number", "exclusiveMinimum": 0},
+        "dasharray": {"type": "number", "minimum": 0},
+        "dashoffset_from": {"type": "number"},
+        "dashoffset_to": {"type": "number"},
+        "linecap": {"enum": ["butt", "round", "square"]},
+        "linejoin": {"enum": ["miter", "round", "bevel"]},
+        "order": {"type": "integer", "minimum": 0},
+        "closed": {"type": "boolean"},
+        "pen_lift": {"type": "boolean"}
+      },
+      "additionalProperties": false
+    },
+    "separation": {
+      "type": "object",
+      "description": "Explode vector. Direction is normalized and distance is in canvas units.",
+      "required": ["axis", "distance"],
+      "properties": {
+        "axis": {"type": "array", "minItems": 2, "maxItems": 2, "items": {"type": "number"}},
+        "distance": {"type": "number"},
+        "depth": {"type": "number", "minimum": -1, "maximum": 1},
+        "order_source": {"enum": ["authored", "z_order", "explicit"]}
+      },
+      "additionalProperties": false
+    },
+    "morph": {
+      "type": "object",
+      "description": "True path interpolation. Requires matched segment counts and index correspondence; a transform-only approximation does not belong here.",
+      "required": ["path_from", "path_to", "correspondence"],
+      "properties": {
+        "path_from": {"type": "string", "minLength": 1},
+        "path_to": {"type": "string", "minLength": 1},
+        "correspondence": {"enum": ["matched", "resampled"]},
+        "segment_count": {"type": "integer", "minimum": 3}
+      },
+      "additionalProperties": false
+    },
+    "mask": {
+      "type": "object",
+      "description": "Mask or wipe channel. Reveal direction and feather are part of the identity decision, not a rendering detail.",
+      "required": ["type"],
+      "properties": {
+        "type": {"enum": ["alpha", "luma", "vector", "clip", "conic", "band", "wedge"]},
+        "angle": {"type": "number"},
+        "feather": {"type": "number", "minimum": 0},
+        "from_pct": {"type": "number", "minimum": 0, "maximum": 100},
+        "to_pct": {"type": "number", "minimum": 0, "maximum": 100}
+      },
+      "additionalProperties": false
+    },
+    "effects": {
+      "type": "object",
+      "description": "Bounded, deterministic effect channels. Every stochastic value is derived from seed and frame, never from runtime randomness.",
+      "properties": {
+        "particle_count": {"type": "integer", "minimum": 0, "maximum": 400},
+        "seed": {"type": "string", "minLength": 1},
+        "lifetime_frames": {"type": "integer", "minimum": 1, "maximum": 120},
+        "turbulence_base_frequency": {"type": "number", "exclusiveMinimum": 0, "maximum": 1},
+        "turbulence_octaves": {"type": "integer", "minimum": 1, "maximum": 8},
+        "sweep_type": {"enum": ["linear", "radial", "conic", "foil"]},
+        "sweep_angle": {"type": "number"},
+        "blend_mode": {"enum": ["normal", "screen", "overlay", "add", "multiply"]}
       },
       "additionalProperties": false
     },
@@ -105,12 +217,43 @@
         "duration_frames": {"type": "integer", "minimum": 1},
         "from": {"$ref": "#/$defs/transform"},
         "to": {"$ref": "#/$defs/transform"},
-        "easing": {"enum": ["settle", "enter", "draw", "organic", "snap", "play", "path-linear"]},
+        "easing": {"enum": ["settle", "enter", "draw", "organic", "snap", "play", "path-linear", "morph"]},
         "confidence": {"enum": ["observed", "inferred", "provisional", "blocked"]},
         "locked": {"type": "boolean"},
-        "final_state": {"type": "boolean"}
+        "final_state": {"type": "boolean"},
+        "technique": {"$ref": "#/$defs/technique"},
+        "scenario_id": {"type": "string", "minLength": 1},
+        "stroke": {"$ref": "#/$defs/stroke"},
+        "separation": {"$ref": "#/$defs/separation"},
+        "morph": {"$ref": "#/$defs/morph"},
+        "mask": {"$ref": "#/$defs/mask"},
+        "effects": {"$ref": "#/$defs/effects"}
       },
       "additionalProperties": false
+    },
+    "technique": {
+      "description": "Technique keys emitted by scripts/profile_logo.py, mapped to scenario ids in references/taxonomy.md.",
+      "enum": [
+        "line_draw_on",
+        "multi_stroke_trace",
+        "kinetic_typography",
+        "mask_wipe",
+        "mask_wipe_mark",
+        "circular_sweep",
+        "particle_dissolve",
+        "morph_shape",
+        "separation_explode",
+        "separation_ordered",
+        "geometric_construction",
+        "extrusion_3d",
+        "bounce_elastic",
+        "orbit_rotate",
+        "orbit_rotate_badge",
+        "gradient_sweep",
+        "idle_loop",
+        "scroll_scrub",
+        "reduced_motion"
+      ]
     }
   },
   "additionalProperties": false

@@ -1,22 +1,95 @@
 {
   "duration": {
-    "one_shot_seconds": [1.2, 4.0],
-    "intro_hold_ms": [500, 1000],
-    "ui_transition_ms": [90, 180],
-    "loop_seconds": [3.0, 8.0]
+    "one_shot_seconds": [
+      1.2,
+      4.0
+    ],
+    "intro_hold_ms": [
+      500,
+      1000
+    ],
+    "ui_transition_ms": [
+      90,
+      180
+    ],
+    "loop_seconds": [
+      3.0,
+      8.0
+    ],
+    "draw_on_ms": [
+      600,
+      1800
+    ],
+    "separation_cycle_ms": [
+      1400,
+      2600
+    ],
+    "idle_cycle_seconds": [
+      2.5,
+      4.0
+    ]
   },
   "easing": {
-    "settle": [0.2, 0.0, 0.0, 1.0],
-    "enter": [0.0, 0.0, 0.2, 1.0],
-    "draw": [0.45, 0.0, 0.55, 1.0],
-    "organic": [0.34, 1.15, 0.64, 1.0],
-    "snap": [0.85, 0.0, 0.15, 1.0],
-    "play": [0.34, 1.15, 0.64, 1.0],
-    "path-linear": [0.0, 0.0, 1.0, 1.0]
+    "settle": [
+      0.2,
+      0.0,
+      0.0,
+      1.0
+    ],
+    "enter": [
+      0.0,
+      0.0,
+      0.2,
+      1.0
+    ],
+    "draw": [
+      0.45,
+      0.0,
+      0.55,
+      1.0
+    ],
+    "organic": [
+      0.34,
+      1.15,
+      0.64,
+      1.0
+    ],
+    "snap": [
+      0.85,
+      0.0,
+      0.15,
+      1.0
+    ],
+    "play": [
+      0.34,
+      1.15,
+      0.64,
+      1.0
+    ],
+    "path-linear": [
+      0.0,
+      0.0,
+      1.0,
+      1.0
+    ]
   },
   "stagger": {
-    "meaningful_group_ms": [40, 80],
-    "dense_wordmark_ms": [20, 50]
+    "meaningful_group_ms": [
+      40,
+      80
+    ],
+    "dense_wordmark_ms": [
+      20,
+      50
+    ],
+    "per_glyph_ms": [
+      40,
+      70
+    ],
+    "pen_lift_ms": [
+      80,
+      250
+    ]
   },
   "overshoot": {
     "identity_critical": 0.0,
@@ -29,5 +102,53 @@
     "settle_ratio": 0.8,
     "poster_last_frame": true,
     "half_open_intervals": true
+  },
+  "draw_on": {
+    "dasharray_floor": "dasharray must be greater than or equal to the measured path length",
+    "duration_model": "duration proportional to path length at a fixed pen speed",
+    "min_rendered_stroke_px": 1.0,
+    "closed_subpath_requires_z": true,
+    "pen_speed_normalized": 1.0
+  },
+  "separation": {
+    "explode_distance_logo_width": 0.18,
+    "depth_scale_delta": 0.22,
+    "depth_blur_px_per_unit": 2.5,
+    "depth_opacity_delta": 0.55,
+    "depth_shadow_offset_px": 6.0,
+    "depth_shadow_alpha": 0.28,
+    "max_blurred_parts": 12,
+    "return_leg_mirrors_outbound": true
+  },
+  "effects": {
+    "particle_count_one_shot": [
+      60,
+      120
+    ],
+    "particle_lifetime_frames": [
+      12,
+      40
+    ],
+    "particle_max_count": 400,
+    "turbulence_base_frequency": [
+      0.01,
+      0.05
+    ],
+    "turbulence_octaves": [
+      2,
+      4
+    ],
+    "deterministic_seed_required": true,
+    "one_burst_max": 1
+  },
+  "detection": {
+    "capability_rungs": 9,
+    "confidence_vector": "inferred",
+    "confidence_raster": "provisional",
+    "confidence_observed_allowed": false,
+    "min_primary_score": 0.2,
+    "min_support_score": 0.35,
+    "max_supporting_gestures": 2,
+    "global_confidence_floor": 0.55
   }
 }

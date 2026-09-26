@@ -1,22 +1,122 @@
 [
-  {"query":"Animate our transparent lotus B logo into a 4-second white-background intro, with petals opening and BODHA LMS appearing one letter at a time.","should_trigger":true},
-  {"query":"Please turn this layered SVG wordmark into a subtle premium reveal for our education LMS homepage.","should_trigger":true},
-  {"query":"I have a flattened logo PNG and need a dotLottie loop with reduced-motion behavior for a product header.","should_trigger":true},
-  {"query":"Can you storyboard a modular geometric logo assembly and render a vertical social version without changing the final lockup?","should_trigger":true},
-  {"query":"Our monogram needs a tasteful weave animation, but the over-under order must stay exact. What source layers and pivots do you need?","should_trigger":true},
-  {"query":"Make a botanical emblem bloom in a transparent WebM and also give me a white H.264 fallback.","should_trigger":true},
-  {"query":"Review this logo animation for final-frame fidelity, small-size readability, alpha halos, and a stable final hold.","should_trigger":true},
-  {"query":"I want a gentle breathing loop for a wellness logo that can pause for reduced-motion users.","should_trigger":true},
-  {"query":"Create a high-resolution logo animation from our layered AI artwork and keep the counters and kerning exact.","should_trigger":true},
-  {"query":"The wordmark should enter while two side leaves are still moving; can you write the frame plan before coding?","should_trigger":true},
-  {"query":"Animate this logo with a CSS hover state and a spring bounce on every letter; please check whether that is appropriate for the brand.","should_trigger":true},
-  {"query":"Make a logo animation but I only care about a fast flashy glitch effect with no final brand hold; please challenge that request.","should_trigger":true},
-  {"query":"Please trace this font outline and export the glyphs as an editable font family.","should_trigger":false},
-  {"query":"Make a 3D product render spin around on a turntable with dramatic studio lighting.","should_trigger":false},
-  {"query":"Write a Python script that batches resize all PNG files in this directory.","should_trigger":false},
-  {"query":"Can you redesign our logo from scratch because the current one feels old?","should_trigger":false},
-  {"query":"Add a looping background music track and sync it to the existing Kdenlive edit.","should_trigger":false},
-  {"query":"Generate a new illustration of a lotus in watercolor for the website hero.","should_trigger":false},
-  {"query":"Fix the TypeScript type error in this React component and run the tests.","should_trigger":false},
-  {"query":"Convert this MP4 to a transparent WebM and explain the ffmpeg command without changing the logo animation.","should_trigger":false}
+  {
+    "query": "Animate our transparent lotus B logo into a 4-second white-background intro, with petals opening and BODHA LMS appearing one letter at a time.",
+    "should_trigger": true
+  },
+  {
+    "query": "Please turn this layered SVG wordmark into a subtle premium reveal for our education LMS homepage.",
+    "should_trigger": true
+  },
+  {
+    "query": "I have a flattened logo PNG and need a dotLottie loop with reduced-motion behavior for a product header.",
+    "should_trigger": true
+  },
+  {
+    "query": "Can you storyboard a modular geometric logo assembly and render a vertical social version without changing the final lockup?",
+    "should_trigger": true
+  },
+  {
+    "query": "Our monogram needs a tasteful weave animation, but the over-under order must stay exact. What source layers and pivots do you need?",
+    "should_trigger": true
+  },
+  {
+    "query": "Make a botanical emblem bloom in a transparent WebM and also give me a white H.264 fallback.",
+    "should_trigger": true
+  },
+  {
+    "query": "Review this logo animation for final-frame fidelity, small-size readability, alpha halos, and a stable final hold.",
+    "should_trigger": true
+  },
+  {
+    "query": "I want a gentle breathing loop for a wellness logo that can pause for reduced-motion users.",
+    "should_trigger": true
+  },
+  {
+    "query": "Create a high-resolution logo animation from our layered AI artwork and keep the counters and kerning exact.",
+    "should_trigger": true
+  },
+  {
+    "query": "The wordmark should enter while two side leaves are still moving; can you write the frame plan before coding?",
+    "should_trigger": true
+  },
+  {
+    "query": "Animate this logo with a CSS hover state and a spring bounce on every letter; please check whether that is appropriate for the brand.",
+    "should_trigger": true
+  },
+  {
+    "query": "Make a logo animation but I only care about a fast flashy glitch effect with no final brand hold; please challenge that request.",
+    "should_trigger": true
+  },
+  {
+    "query": "Please trace this font outline and export the glyphs as an editable font family.",
+    "should_trigger": false
+  },
+  {
+    "query": "Make a 3D product render spin around on a turntable with dramatic studio lighting.",
+    "should_trigger": false
+  },
+  {
+    "query": "Write a Python script that batches resize all PNG files in this directory.",
+    "should_trigger": false
+  },
+  {
+    "query": "Can you redesign our logo from scratch because the current one feels old?",
+    "should_trigger": false
+  },
+  {
+    "query": "Add a looping background music track and sync it to the existing Kdenlive edit.",
+    "should_trigger": false
+  },
+  {
+    "query": "Generate a new illustration of a lotus in watercolor for the website hero.",
+    "should_trigger": false
+  },
+  {
+    "query": "Fix the TypeScript type error in this React component and run the tests.",
+    "should_trigger": false
+  },
+  {
+    "query": "Convert this MP4 to a transparent WebM and explain the ffmpeg command without changing the logo animation.",
+    "should_trigger": false
+  },
+  {
+    "query": "Our monoline logo should draw itself on like a pen sketch, stroke by stroke, with a proper draw order.",
+    "should_trigger": true
+  },
+  {
+    "query": "Animate this logo so the pieces separate, hold apart, and come back together in the right depth order.",
+    "should_trigger": true
+  },
+  {
+    "query": "Make the wordmark letters rise one at a time with correct optical spacing, and check the counters stay open.",
+    "should_trigger": true
+  },
+  {
+    "query": "Analyze this logo file and tell me which animation techniques its structure actually supports before we commit.",
+    "should_trigger": true
+  },
+  {
+    "query": "We need a subtle idle loop for a persistent header mark that pauses for reduced-motion users and does not eat battery.",
+    "should_trigger": true
+  },
+  {
+    "query": "A restrained light sweep across the logo once it is already readable, without banding in the alpha master.",
+    "should_trigger": true
+  },
+  {
+    "query": "Dissolve the mark into particles and reassemble it, but the render has to be identical on every run.",
+    "should_trigger": true
+  },
+  {
+    "query": "Trace every contour of this logo and export the result as a laser-cuttable DXF for our fab shop.",
+    "should_trigger": false
+  },
+  {
+    "query": "Rewrite our brand guidelines from scratch including a new color system and typography.",
+    "should_trigger": false
+  },
+  {
+    "query": "Build a WebGL shader that raytraces the logo as a chrome sphere.",
+    "should_trigger": false
+  }
 ]

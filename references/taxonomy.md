@@ -10,6 +10,7 @@ Use independent axes. A logo's structure, story, context, mode, runtime, backgro
 - Context modifiers
 - Mode/runtime/background/platform
 - Selection rules
+- Technique families
 - Scenario index
 
 ## Classification model
@@ -18,16 +19,16 @@ Record a classification before choosing a motion technique:
 
 ```text
 Anatomy: organic | geometric | monogram | lettermark | wordmark | badge | combination
-Narrative: trace | assemble | unfold | mask | morph | route | stamp | state-change | loop
+Narrative: trace | separate | assemble | unfold | mask | morph | sweep | route | stamp | state-change | loop
 Context: premium | education | playful | technology | wellness | general
 Mode: audit | plan | produce | interactive
-Behavior: one-shot | loop | state-change | ambient
+Behavior: one-shot | loop | idle | state-change | ambient | scrub
 Runtime: Remotion | SVG | Lottie | dotLottie | After Effects | other
 Background: alpha | white | brand | dark | checkerboard-preview
 Platform: web | social | editorial | app | presentation | broadcast
 ```
 
-`Combination` means a symbol paired with a wordmark, descriptor, or lockup; route its symbol and text through the relevant anatomy references. `Wellness` usually uses organic or minimal guidance. `Mode` says what the agent is doing; `Behavior` says what the audience experiences. Do not treat runtime, background, or platform as a motion concept.
+`Combination` means a symbol paired with a wordmark, descriptor, or lockup; route its symbol and text through the relevant anatomy references. `Wellness` usually uses organic or minimal guidance. `Mode` says what the agent is doing; `Behavior` says what the audience experiences. `Idle` is a rest state plus a duty cycle and is a separate decision from `loop`, which is a full cycle with no rest. Do not treat runtime, background, or platform as a motion concept.
 
 ## Anatomy categories
 
@@ -59,7 +60,9 @@ A contained composition with rings, seals, ribbons, borders, crests, or dense de
 | Assemble | Separate modules converge | 0.9–1.8 s | Loading-spinner feeling or collisions |
 | Unfold | Leaves, petals, panels, or pages open | 1.2–3.0 s | Incorrect pivots or rubbery overshoot |
 | Mask | Typography or icon revealed through a boundary | 0.6–1.4 s | Arbitrary clipping direction |
+| Separate | Independently addressable parts move apart and reassemble | 0.7–2.0 s | Wrong occlusion order or a wordmark cut into fragments |
 | Morph | Compatible source and target geometry | 1.0–2.0 s | Self-intersection or topology changes |
+| Sweep | Gradient, foil, or light pass across a readable mark | 0.4–0.8 s | Banding in 8-bit alpha or competing with the mark |
 | Route | A packet, line, or accent follows a meaningful path | 0.9–1.8 s | Generic glow or visual spaghetti |
 | Stamp/seal | Short, decisive press or closure | 0.5–1.0 s | Cartoon aggression or illegible microtype |
 | State change | Hover, active, success, or progress state | 90–180 ms | State semantics or accessibility mismatch |
@@ -89,15 +92,31 @@ These are planning ranges, not a reason to force complexity onto a simple mark. 
 - **White background:** exact `#FFFFFF` only when requested; never bake it into the alpha master.
 - **Platform:** recompose deliberately for square, vertical, horizontal, app, editorial, and broadcast targets.
 
+## Technique families
+
+Group candidate techniques by role before ranking them. Exactly one `reveal` technique can be primary; `surface`, `loop`, `driver`, and `a11y` are additive and never compete for the primary slot.
+
+| Role | Families |
+|---|---|
+| Reveal | line drawing, kinetic typography, mask or wipe, circular sweep, matter dissolve, morph |
+| Transform | separation, geometric construction, depth extrusion, elastic settle |
+| Surface | gradient and light sweep |
+| Loop | idle and ambient, orbit and rotor |
+| Driver | scroll and scrub linkage |
+| Accessibility | reduced-motion branch, emitted unconditionally |
+
+Resolve collisions by keeping the highest-scoring reveal as primary and demoting the rest. Read `technique-selection.md` for the capability ladder, the gate codes, and the evidence rules that produce this ranking.
+
 ## Selection rules
 
 1. If the source has no reliable layers, choose a grouped or whole-mark concept before attempting independent motion.
-2. If the mark is identity-critical, prefer transforms and opacity over redraw, morph, or texture.
-3. Choose one primary narrative and make every secondary gesture support it.
-4. Start the wordmark once the primary silhouette is readable unless text is explicitly the hero.
-5. Test the concept at thumbnail size and on the final background.
-6. Reject a concept that needs a long explanation to look intentional.
-7. For frame-driven renderers, use half-open intervals `[start, start + duration)` and guarantee a static hold after `settle_frame`.
+2. Run the structural profile before choosing. A technique the profile gated is impossible with this source, not merely inelegant.
+3. If the mark is identity-critical, prefer transforms and opacity over redraw, morph, or texture.
+4. Choose one primary narrative and make every secondary gesture support it.
+5. Start the wordmark once the primary silhouette is readable unless text is explicitly the hero.
+6. Test the concept at thumbnail size and on the final background.
+7. Reject a concept that needs a long explanation to look intentional.
+8. For frame-driven renderers, use half-open intervals `[start, start + duration)` and guarantee a static hold after `settle_frame`.
 
 ## Scenario index
 
@@ -136,3 +155,31 @@ These are planning ranges, not a reason to force complexity onto a simple mark. 
 | TECH-02 | Data trace | `contexts/technology-and-software.md` |
 | TECH-03 | Circuit routing | `contexts/technology-and-software.md` |
 | TECH-04 | Interactive state | `contexts/technology-and-software.md` |
+| LINE-01 | Continuous contour draw-on | `patterns/line-drawing-and-trace.md` |
+| LINE-02 | Multi-stroke trace with junction order | `patterns/line-drawing-and-trace.md` |
+| LINE-03 | Contour and edge trace | `patterns/line-drawing-and-trace.md` |
+| LINE-04 | Draw-then-fill | `patterns/line-drawing-and-trace.md` |
+| LINE-05 | Travelling dash and comet | `patterns/line-drawing-and-trace.md` |
+| LINE-06 | Per-letter write-on | `patterns/line-drawing-and-trace.md` |
+| SEP-01 | Radial burst separation | `patterns/separation-and-explode.md` |
+| SEP-02 | Axis separation and reassembly | `patterns/separation-and-explode.md` |
+| SEP-03 | Depth-layered separation | `patterns/separation-and-explode.md` |
+| SEP-04 | Occlusion-order assembly | `patterns/separation-and-explode.md` |
+| SEP-05 | Slice and shatter separation | `patterns/separation-and-explode.md` |
+| SEP-06 | Mask separation on flattened art | `patterns/separation-and-explode.md` |
+| KINE-01 | Per-glyph stagger | `patterns/kinetic-typography.md` |
+| KINE-02 | Baseline mask reveal | `patterns/kinetic-typography.md` |
+| KINE-03 | Variable-axis weight morph | `patterns/kinetic-typography.md` |
+| KINE-04 | Text on a path | `patterns/kinetic-typography.md` |
+| KINE-05 | Initial to lockup | `patterns/kinetic-typography.md` |
+| IDLE-01 | Rest to breathing loop | `patterns/idle-and-ambient.md` |
+| IDLE-02 | Orbit and rotor idle | `patterns/idle-and-ambient.md` |
+| IDLE-03 | Interactive state set | `patterns/idle-and-ambient.md` |
+| IDLE-04 | Scroll and scrub linkage | `patterns/idle-and-ambient.md` |
+| FX-01 | Particle assemble | `patterns/matter-and-particles.md` |
+| FX-02 | Alpha-threshold dissolve | `patterns/matter-and-particles.md` |
+| FX-03 | Turbulence displacement | `patterns/matter-and-particles.md` |
+| FX-04 | Halftone and dot-matrix build | `patterns/matter-and-particles.md` |
+| FX-05 | Glitch and RGB split | `patterns/matter-and-particles.md` |
+| PROFILE-01 | Profile and rank techniques | `technique-selection.md` |
+| MECH-01 | Cross-renderer advanced mechanics | `implementation/advanced-mechanics.md` |

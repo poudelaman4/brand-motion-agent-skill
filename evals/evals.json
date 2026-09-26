@@ -5,7 +5,9 @@
       "id": 1,
       "prompt": "Use the synthetic flattened logo fixture at evals/files/flattened-logo.png. Make a tasteful 4-second white-background animation: the emblem should establish first, the wordmark should enter while the emblem is still readable, and the final state must match the source. I also need a checkpoint sheet and a high-resolution output plan. Do not pretend the flattened file contains independent letters or leaves.",
       "expected_output": "The agent identifies the flattened-source limitation, requests or records approved groups, creates a renderer-neutral brief/manifest with 120 frames at 30 fps by default, uses a whole-mark or approved-group fallback, and specifies final-state/QA checks.",
-      "files": ["evals/files/flattened-logo.png"],
+      "files": [
+        "evals/files/flattened-logo.png"
+      ],
       "assertions": [
         "The response explicitly classifies the source as flattened or otherwise non-semantic.",
         "The response does not claim that connected components are guaranteed independent logo layers.",
@@ -18,7 +20,9 @@
       "id": 2,
       "prompt": "Use the layered fixture at evals/files/layered-mark.svg for our education startup. We need a clean geometric/botanical reveal for a website and a 9:16 social version, without generic neon AI effects. The mark should assemble or unfold into the approved lockup. Explain what source layers, pivots, timing, and delivery variants you need before rendering.",
       "expected_output": "The agent classifies the vector/layered source, selects one restrained primary pattern, names the required semantic layers and pivots, proposes separate square and vertical compositions from one timing model, and avoids inventing geometry or effects.",
-      "files": ["evals/files/layered-mark.svg"],
+      "files": [
+        "evals/files/layered-mark.svg"
+      ],
       "assertions": [
         "The response identifies the SVG as vector/layered source rather than a flattened raster.",
         "The response selects one primary motion pattern and no more than two supporting gestures.",
@@ -31,7 +35,9 @@
       "id": 3,
       "prompt": "We only have a flattened logo PNG and need a transparent looping animation for a product header. Can you make the letters and a ring animate independently, and deliver a dotLottie or WebM? Include reduced-motion behavior and tell me what is impossible from the flattened source.",
       "expected_output": "The agent separates alpha/white/opaque delivery, explains that independent motion and hidden pixels are blocked without layers, proposes a grouped or whole-mark fallback, defines loop-boundary and reduced-motion checks, and avoids promising a dotLottie/WebM before the source and runtime are confirmed.",
-      "files": ["evals/files/flattened-logo.png"],
+      "files": [
+        "evals/files/flattened-logo.png"
+      ],
       "assertions": [
         "The response distinguishes transparent, white, and opaque outputs.",
         "The response marks independent letters/ring motion as blocked or provisional from a flattened source.",
@@ -44,7 +50,10 @@
       "id": 4,
       "prompt": "Review the motion manifest at evals/files/invalid-motion-spec.json. Identify why it should not render, then produce a corrected manifest using the supplied layered fixture and explain the final-state acceptance criteria.",
       "expected_output": "The agent runs or applies the manifest validator, catches frame ordering, bounds, easing, scale, and noncanonical-final-transform errors, repairs the manifest, and explains encoded-output tolerance separately from canonical geometry.",
-      "files": ["evals/files/invalid-motion-spec.json", "evals/files/layered-mark.svg"],
+      "files": [
+        "evals/files/invalid-motion-spec.json",
+        "evals/files/layered-mark.svg"
+      ],
       "assertions": [
         "The response identifies the invalid frame ordering and invalid bounds.",
         "The response identifies the unsupported easing token and nonpositive scale.",
@@ -57,12 +66,61 @@
       "id": 5,
       "prompt": "A flattened logo PNG was reconstructed into a raster ring and crossfaded with clean vector geometry. The final frame looks correct, but a pale duplicate ring or matte fragment appears around the crossfade midpoint. Diagnose the failure and specify the repair and QA evidence before delivery.",
       "expected_output": "The agent treats the extracted raster layer as provisional, identifies low-alpha ringing or crop contamination as a likely cause, prefers approved vector or whole-mark geometry, and requires direct start/mid/end stills plus decoded transition-frame checks.",
-      "files": ["evals/files/flattened-logo.png"],
+      "files": [
+        "evals/files/flattened-logo.png"
+      ],
       "assertions": [
         "The response does not assume a clean final frame proves the transition is clean.",
         "The response inspects the extracted layer alone and in the complete composition over multiple backgrounds.",
         "The response requires direct start/mid/end transition stills and decoded encoded-frame evidence.",
         "The response prefers a clean vector or whole-mark fallback over hiding a ghost with blur, glow, or opacity."
+      ]
+    },
+    {
+      "id": 6,
+      "prompt": "Before we commit to a concept, analyze the layered fixture at evals/files/layered-mark.svg and tell me which animation techniques its structure actually supports, which are impossible, and why. Do not just pick something that looks nice.",
+      "expected_output": "The agent runs the structural profiler, reports the capability rung and measured fingerprint, ranks at most one primary plus two supporting techniques, lists gated techniques with their gate codes, labels the recommendation inferred rather than observed, and separates structural evidence from the brand-context decision.",
+      "files": [
+        "evals/files/layered-mark.svg"
+      ],
+      "assertions": [
+        "The response runs or applies the structural profiler and reports measured values rather than an ungrounded guess.",
+        "The response labels the recommendation inferred on a vector source and never observed.",
+        "The response lists at least one gated technique with a gate code such as NO_VECTOR_GEOMETRY or LIVE_TEXT.",
+        "The response proposes at most one primary technique and at most two supporting gestures.",
+        "The response separates what the structure permits from what the brand context decides, and does not treat a score as the decision."
+      ]
+    },
+    {
+      "id": 7,
+      "prompt": "Our monoline logo is four separate strokes that meet at sharp corners. We want it to draw itself on like a pen sketch. Work out the draw order, tell us how many times the pen has to lift, and write the manifest.",
+      "expected_output": "The agent builds the endpoint graph, runs the Eulerian check, reports the odd-vertex count and required pen lifts, applies the start-point priority rule, normalizes per-path duration by path length, and writes stroke channels with a dasharray at least as long as each measured path.",
+      "files": [
+        "evals/files/layered-mark.svg",
+        "evals/files/valid-advanced-spec.json"
+      ],
+      "assertions": [
+        "The response derives the draw order from the geometry and states the odd-vertex or pen-lift count rather than inventing a sequence.",
+        "The response applies a start-point rule and does not start on the axis of symmetry of a closed symmetric mark.",
+        "The response normalizes per-path duration by path length so short strokes do not snap.",
+        "Every stroke channel sets dasharray greater than or equal to its path length.",
+        "The response keeps the final transform canonical on stroke layers instead of animating scale or position to fake the reveal."
+      ]
+    },
+    {
+      "id": 8,
+      "prompt": "We only have the flattened PNG. The client wants the ring, the leaves, and the wordmark to fly apart and reassemble in three dimensions. Use the advanced technique contract at evals/files/valid-advanced-spec.json as the shape of the deliverable and be straight with me about what is possible.",
+      "expected_output": "The agent profiles the raster, marks component-derived values provisional, keeps independent part motion blocked, proposes band, wedge, or conic mask separation on identical copies of the same image, and refuses the three-dimensional request without an approved layered or vector source.",
+      "files": [
+        "evals/files/flattened-logo.png",
+        "evals/files/valid-advanced-spec.json"
+      ],
+      "assertions": [
+        "The response marks the flattened source's component-derived values as provisional and does not call them semantic layers.",
+        "The response keeps independent per-part motion blocked or provisional pending an approved layered or vector source.",
+        "The response proposes a mask-based separation fallback rather than fabricating hidden parts.",
+        "The response separates the explode direction and depth channel from the transform channel in the manifest shape.",
+        "The response refuses the depth or three-dimensional request explicitly rather than approximating it silently."
       ]
     }
   ]
