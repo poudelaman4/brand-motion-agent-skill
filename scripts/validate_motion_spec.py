@@ -259,9 +259,12 @@ def validate_detection(value: object, errors: list[str]) -> None:
     unknown = sorted(set(value) - allowed)
     if unknown:
         errors.append(f"{prefix} contains invalid fields: {unknown}")
-    missing = sorted({"confidence", "primary", "supporting"} - set(value))
+    missing = sorted({"confidence", "primary", "supporting", "register", "frequency",
+                      "taste"} - set(value))
     if missing:
-        errors.append(f"{prefix} is missing required fields: {missing}")
+        errors.append(f"{prefix} is missing required fields: {missing}. A detection block "
+                      "without a register and a taste budget is ungated; taste is not "
+                      "derivable from the asset, so it must be stated.")
     # A fingerprint-derived recommendation is inferred at best, and provisional
     # on a flattened raster. It is never observed.
     if value.get("confidence") not in DETECTION_CONFIDENCE:
@@ -315,6 +318,15 @@ def validate_detection(value: object, errors: list[str]) -> None:
     taste = value.get("taste")
     if taste is not None:
         validate_taste(taste, f"{prefix}.taste", errors, register, frequency)
+    # The gate only counts if it actually gated something.
+    if isinstance(taste, dict) and taste.get("vetoed") is not None \
+            and isinstance(value.get("primary"), dict):
+        vetoed = {entry.get("technique") for entry in taste["vetoed"]
+                  if isinstance(entry, dict)}
+        if value["primary"].get("technique") in vetoed:
+            errors.append(f"{prefix}.primary is {value['primary'].get('technique')}, which "
+                          "the register vetoes. A vetoed technique is removed from the "
+                          "ranking, not kept as the primary.")
 
 
 def validate_taste(value: object, prefix: str, errors: list[str],

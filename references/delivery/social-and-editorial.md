@@ -50,15 +50,15 @@ Give each ratio its own composition, safe zones, and text zones from the canonic
 
 ## Platform covered zones
 
-Re-verify every figure per campaign: interface releases move these overlays, so hold each as a range and prefer an `observed` capture over an `inferred` carry-over.
+Platform interface overlays move with every release, so these figures are the most volatile numbers in the package. Treat `verified_on` as a hard expiry: a row older than 90 days is `BLOCKED` for placement, not `provisional`. Re-verify per campaign from a current interface capture and prefer that capture over any carry-over from this table.
 
-| Surface | Covered zone, observed | Status |
-|---|---|---|
-| TikTok vertical | Top 108 px, bottom 320 px, left 60 px, right 120 px; text-safe ~840×1280 px | [UNVERIFIED]; ranges reported top 130–250 px, bottom 250–320 px |
-| Stories | Top and bottom 250 px; Highlights safe content 1080×1080 px, 420 px clear | [UNVERIFIED] |
-| Reels, boosted | 1010×1280 px safe zone, 220 px from top, 420 px from bottom | [UNVERIFIED] |
-| Reels cover crop | Key elements inside the centred 1080×1350 px zone | [UNVERIFIED] |
-| Feed carousel | Side margins 50–120 px for platform icons | [UNVERIFIED] |
+| Surface | Covered zone | Status | Verified on |
+|---|---|---|---|
+| TikTok vertical | Top 108 px, bottom 320 px, left 60 px, right 120 px; text-safe ~840×1280 px | `provisional`; ranges reported top 130–250 px, bottom 250–320 px | 2026-09-26 |
+| Stories | Top and bottom 250 px; Highlights safe content 1080×1080 px, 420 px clear | `provisional` | 2026-09-26 |
+| Reels, boosted | 1010×1280 px safe zone, 220 px from top, 420 px from bottom | `provisional` | 2026-09-26 |
+| Reels cover crop | Key elements inside the centred 1080×1350 px zone | `provisional` | 2026-09-26 |
+| Feed carousel | Side margins 50–120 px for platform icons | `provisional` | 2026-09-26 |
 
 Keep essential content out of the outer 250–450 px of a 1080×1920 px frame, and treat a mark under the action rail as undelivered.
 

@@ -150,6 +150,21 @@
         "The response does not meet the floor by slowing the mark's entrance or by reducing its time at full contrast.",
         "The response records the conflict and its resolution in the brief rather than silently shipping an unreadable wordmark."
       ]
+    },
+    {
+      "id": 11,
+      "prompt": "Profile the layered fixture at evals/files/layered-mark.svg and tell me which animation to use. I haven't told you anything about the brand, so just give me your best recommendation and a manifest I can send to engineering.",
+      "expected_output": "The agent refuses to produce an ungated recommendation, asks for the brand register or a stated brand claim rather than inferring one from the asset, and explains that taste is a judgement about the brand rather than a property of the file. Once given a register it applies the veto and the budget, and the manifest carries the register and the taste block.",
+      "files": [
+        "evals/files/layered-mark.svg"
+      ],
+      "assertions": [
+        "The response does not run the profiler without a register, or treats a missing register as acceptable.",
+        "The response asks for the brand register or a stated brand claim instead of inferring one from the mark's geometry or complexity.",
+        "The response explains that the register cannot be derived from the asset.",
+        "Any manifest it produces carries a register, a frequency, and a taste block with a budget.",
+        "The response does not present an ungated ranked list as a finished recommendation."
+      ]
     }
   ]
 }

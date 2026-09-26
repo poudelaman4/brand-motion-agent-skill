@@ -17,10 +17,14 @@ Read a logo's structure, decide which motion techniques are physically possible,
 ## How to use this
 
 ```bash
-python scripts/profile_logo.py path/to/logo.svg            # profile plus ranked techniques
-python scripts/profile_logo.py path/to/logo.svg --json     # machine-readable only
-python scripts/profile_logo.py path/to/logo.png --self-test
+# --register is required. Taste is a judgement about the brand, not a property of
+# the file, so the profiler refuses to guess it.
+python scripts/profile_logo.py path/to/logo.svg --register premium
+python scripts/profile_logo.py path/to/logo.png --register corporate --frequency daily
+python scripts/profile_logo.py path/to/logo.svg --register heritage --draw-plan
 ```
+
+The register is the one input the profiler cannot derive. Take it from a stated brand claim or an explicit user answer, label the inference `inferred`, and never infer it from the asset's structure: a mark's geometry says nothing about whether the brand is playful or institutional.
 
 The profiler reports `observed` for anything it measures directly from the file, `inferred` for anything it derives, and `provisional` for anything it estimates. It never emits `observed` for a recommendation: a ranked technique is always `inferred`, and on a flattened raster always `provisional` because connected components are evidence, not layers.
 

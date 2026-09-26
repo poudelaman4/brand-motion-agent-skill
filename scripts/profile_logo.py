@@ -1720,9 +1720,9 @@ def taste_gate(profile: dict, ranked: list, register: str, frequency: str) -> di
         "notes": [],
     }
     if register not in REGISTERS or frequency not in FREQUENCIES:
-        result["notes"].append("register or frequency not supplied; no taste gate applied")
-        result["permitted"] = [item["technique"] for item in ranked]
-        return result
+        raise ValueError(
+            f"taste gate requires a known register and frequency; got "
+            f"{register!r} and {frequency!r}")
 
     spec = REGISTERS[register]
     freq = FREQUENCIES[frequency]
@@ -1929,6 +1929,14 @@ def self_test(root: Path) -> int:
     decision = recommend(result, 0.0)
     if not decision.get("primary"):
         failures.append("no primary technique was recommended")
+    taste = taste_gate(result, [decision["primary"]] + decision["supporting"],
+                       "luxury", "daily")
+    budget = taste.get("budget", {})
+    if (budget.get("duration_ceiling_s") != 0.75 or budget.get("gesture_ceiling") != 1
+            or budget.get("overshoot_ceiling") != 0.0):
+        failures.append(f"taste budget is wrong for luxury at daily frequency: {budget}")
+    if not taste.get("vetoed"):
+        failures.append("the luxury register vetoed nothing on a fixture it should veto")
     if decision.get("confidence") == "observed":
         failures.append("a recommendation must never be reported as observed")
     gates = feasibility_gates(result)
@@ -1959,9 +1967,10 @@ def main() -> int:
                         help="include the stroke draw-on ordering plan")
     parser.add_argument("--min-confidence", type=float, default=0.0,
                         help="minimum score for a technique to be reported (default 0.0)")
-    parser.add_argument("--register", default="auto",
-                        help="brand register for the taste gate: " + ", ".join(sorted(REGISTERS))
-                             + ", or auto (default)")
+    parser.add_argument("--register",
+                        help="brand register; required for any profiling run, because taste "
+                             "is not derivable from the asset. One of: "
+                             + ", ".join(sorted(REGISTERS)))
     parser.add_argument("--frequency", default="occasional",
                         help="expected views by one person: " + ", ".join(sorted(FREQUENCIES))
                              + " (default occasional)")
@@ -1980,8 +1989,11 @@ def main() -> int:
     if not 0.0 <= args.min_confidence <= 1.0:
         print("min-confidence must be between 0 and 1.", file=sys.stderr)
         return 2
-    if args.register != "auto" and args.register not in REGISTERS:
-        print(f"register must be auto or one of {sorted(REGISTERS)}.", file=sys.stderr)
+    if not args.register or args.register not in REGISTERS:
+        print(f"--register is required and must be one of {sorted(REGISTERS)}.\n"
+              "Taste is a judgement about the brand, not a property of the file, so the "
+              "profiler will not guess it. Ask which register the brand occupies, or infer "
+              "it from a stated brand claim and label the inference `inferred`.", file=sys.stderr)
         return 2
     if args.frequency not in FREQUENCIES:
         print(f"frequency must be one of {sorted(FREQUENCIES)}.", file=sys.stderr)
@@ -2002,13 +2014,9 @@ def main() -> int:
     decision = recommend(result, args.min_confidence)
     ranked_all = [decision["primary"]] + decision["supporting"]
     taste = taste_gate(result, ranked_all, args.register, args.frequency)
-    if args.register != "auto":
-        decision["primary"], decision["supporting"] = split_after_taste(decision, taste)
-        decision["taste"] = taste
-    else:
-        taste["notes"].append("register not supplied; the taste gate was not applied and "
-                              "no register veto was enforced")
-        decision["taste"] = taste
+    decision["primary"], decision["supporting"] = split_after_taste(decision, taste)
+    decision["taste"] = taste
+    decision["taste_gate_applied"] = True
     if args.min_confidence > 0:
         decision["primary"] = decision["primary"] if \
             decision["primary"]["score"] >= args.min_confidence else None

@@ -149,7 +149,10 @@
     "min_primary_score": 0.2,
     "min_support_score": 0.35,
     "max_supporting_gestures": 2,
-    "global_confidence_floor": 0.55
+    "global_confidence_floor": 0.55,
+    "register_required": true,
+    "taste_gate_bypassable": false,
+    "register_source": "a stated brand claim or an explicit user answer; never inferred from the asset's structure"
   },
   "registers": {
     "premium": {

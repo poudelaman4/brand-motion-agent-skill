@@ -142,11 +142,14 @@
     },
     "detection": {
       "type": "object",
-      "description": "Structural profile and ranked recommendation from scripts/profile_logo.py. Confidence is inferred on a vector source and provisional on a flattened raster; it is never observed.",
+      "description": "Structural profile, ranked recommendation, and the taste gate from scripts/profile_logo.py. register and taste are required: a manifest with no taste block is ungated and must not ship. Confidence is inferred on a vector source and provisional on a flattened raster; it is never observed.",
       "required": [
         "confidence",
         "primary",
-        "supporting"
+        "supporting",
+        "register",
+        "frequency",
+        "taste"
       ],
       "properties": {
         "tool": {
@@ -252,7 +255,14 @@
           ]
         },
         "taste": {
-          "$ref": "#/$defs/taste"
+          "$ref": "#/$defs/taste",
+          "required": [
+            "register",
+            "frequency",
+            "budget",
+            "permitted",
+            "vetoed"
+          ]
         }
       },
       "additionalProperties": false

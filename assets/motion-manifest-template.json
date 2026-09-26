@@ -72,7 +72,60 @@
     ],
     "notes": [
       "Record why a recommendation was overridden rather than silently replacing it."
-    ]
+    ],
+    "register": "wellness",
+    "frequency": "occasional",
+    "taste": {
+      "register": "wellness",
+      "frequency": "occasional",
+      "budget": {
+        "duration_ceiling_s": 2.4,
+        "gesture_ceiling": 1,
+        "overshoot_ceiling": 0.05
+      },
+      "permitted": [
+        "separation_explode",
+        "kinetic_typography",
+        "line_draw_on",
+        "gradient_sweep",
+        "mask_wipe"
+      ],
+      "vetoed": [
+        {
+          "technique": "particle_dissolve",
+          "scenario_id": "FX-02",
+          "score": 0.0,
+          "reason": "the wellness register has no percussion and a particle burst is decorative; it also breaks the determinism rule",
+          "register": "wellness"
+        },
+        {
+          "technique": "circular_sweep",
+          "scenario_id": "BADGE-01",
+          "score": 0.0,
+          "reason": "a circular sweep on a botanical mark implies an objecthood the artwork does not have",
+          "register": "wellness"
+        }
+      ],
+      "cliches": [
+        {
+          "technique": "gradient_sweep",
+          "why": "the specular highlight is the cheapest way to imply premium, and it has swept every logo",
+          "dead_in": "a botanical or organic mark; it reads as a flicker on a soft contour",
+          "replacement": "a reveal that follows the mark's own growth direction",
+          "verdict": "acceptable only with a stated brand referent; drop it otherwise"
+        },
+        {
+          "technique": "kinetic_typography",
+          "why": "per-letter spring is the default kinetic preset",
+          "dead_in": "a word of more than six characters, and any enterprise context",
+          "replacement": "type arriving on a shared baseline in reading order",
+          "verdict": "acceptable with a stated referent; the mask reveal here is the safer of the two"
+        }
+      ],
+      "notes": [
+        "This template demonstrates every manifest channel at once and therefore exceeds the register's gesture ceiling. A produced manifest must not: one primary plus at most two supporting gestures, with the rest in the taste block as permitted but unused."
+      ]
+    }
   },
   "layers": [
     {

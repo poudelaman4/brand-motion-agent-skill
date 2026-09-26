@@ -25,6 +25,7 @@ import sys
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
+STAMP_DATE = "2026-09-26"  # release date for the volatile-figure stamps
 ERRORS: list[str] = []
 NOTES: list[str] = []
 
@@ -180,11 +181,69 @@ def check_manifest_validator() -> None:
         else:
             note("advanced manifest validates, so the stroke, separation, mask, and "
                  "detection channels stay exercised.")
+    # The shipped template is what an agent copies from. If it drifts out of the
+    # contract, every manifest produced from it is wrong, so validate it too.
+    template = ROOT / "assets" / "motion-manifest-template.json"
+    if not template.exists():
+        fail("assets/motion-manifest-template.json is missing.")
+    else:
+        result = subprocess.run([sys.executable, str(script), str(template)],
+                                capture_output=True, text=True)
+        if result.returncode != 0:
+            fail(f"the shipped manifest template must satisfy the contract but returned "
+                 f"{result.returncode}: {result.stdout.strip()}")
+        else:
+            note("the shipped manifest template satisfies the current contract.")
     bad = subprocess.run([sys.executable, str(script), str(invalid)], capture_output=True, text=True)
     if bad.returncode == 0:
         fail("invalid-motion-spec.json should FAIL but the validator passed it.")
     else:
         note("manifest validator correctly passes the valid fixture and rejects the invalid one.")
+
+
+VOLATILE_FILES = {
+    "references/delivery/social-and-editorial.md": STAMP_DATE,
+    "references/delivery/digital-product-and-ui.md": STAMP_DATE,
+}
+
+
+def check_volatile_figures() -> None:
+    """Volatile platform figures must carry a verified-on date.
+
+    These numbers change whenever a platform ships, so a row with no date cannot be
+    distinguished from a row that was accurate when it was written. This only
+    checks that the date is present and not absurd; expiry is a judgement call
+    made per campaign, and the files say so.
+    """
+    import datetime
+
+    today = datetime.date.today()
+    for rel, expected in sorted(VOLATILE_FILES.items()):
+        path = ROOT / rel
+        if not path.exists():
+            fail(f"expected volatile-figure file missing: {rel}")
+            continue
+        text = path.read_text(encoding="utf-8")
+        if "Verified on" not in text:
+            fail(f"{rel} holds volatile platform figures with no 'Verified on' column.")
+            continue
+        stamps = re.findall(r"\|\s*(\d{4}-\d{2}-\d{2})\s*\|", text)
+        if not stamps:
+            fail(f"{rel} has a 'Verified on' header but no dated rows.")
+            continue
+        try:
+            newest = max(datetime.date.fromisoformat(stamp) for stamp in stamps)
+        except ValueError as exc:
+            fail(f"{rel} has a malformed verified-on date: {exc}")
+            continue
+        age_days = (today - newest).days
+        if newest != datetime.date.fromisoformat(expected):
+            note(f"{rel} verified-on is {newest}, not the package release date {expected}.")
+        if age_days > 90:
+            fail(f"{rel} volatile figures were verified {age_days} days ago; past the "
+                 "90-day horizon. Re-verify the platform zones or mark them blocked.")
+        else:
+            note(f"{rel} volatile figures verified {age_days} days ago.")
 
 
 def check_profiler() -> None:
@@ -232,6 +291,7 @@ def main() -> int:
     check_evals()
     check_manifest_validator()
     check_profiler()
+    check_volatile_figures()
 
     for message in NOTES:
         print(f"note: {message}")

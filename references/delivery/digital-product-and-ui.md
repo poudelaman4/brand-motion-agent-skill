@@ -55,6 +55,21 @@ Expect four refusals, each standing on a published guideline rather than on tast
 
 Ship a stateful, themed, branching file when the asset must respond to theme, state, or a branch. Use the dotLottie format for that case: it bundles animations, images, themes, and state machines into one deflate archive, reported at 50–80% smaller than bare Lottie JSON and up to 10× smaller with embedded images. Weigh the bundle against the runtime: the player engine is about 500 KB compressed and sits on the critical path of the first frame, so preload it at route load. Weigh that against one file per theme, which multiplies assets by theme count and blocks runtime theme switching. Documented outcomes report 60–70% smaller files with most under 100 KB at 18.7 M impressions.
 
+## Volatile platform figures
+
+Some figures in this file come from platform documentation that is versioned, and some from platform behaviour that is not. The versioned ones — icon canvases, appearance counts, the static launch-screen rule, reduced-motion criteria — move only on a documented OS or spec revision. The unversioned ones — covered interface zones, client playback behaviour, asset size expectations — move whenever a client ships. Record which is which before quoting a number.
+
+| Figure | Volatility | Verified on |
+|---|---|---|
+| App icon canvas and appearance variants | Versioned with the platform specification | 2026-09-26 |
+| Launch screen must be static | Versioned with the platform guideline | 2026-09-26 |
+| Reduced-motion criteria and prohibited effect classes | Versioned with the platform review criteria | 2026-09-26 |
+| Micro-interaction duration guidance | Consensus guidance, not a specification | 2026-09-26 |
+| Loader and hero asset size ceilings | Community practice, not a vendor limit | 2026-09-26 |
+| Notification and avatar render sizes | Versioned with the platform | 2026-09-26 |
+
+Treat any row older than 90 days as `provisional` for guidance and `BLOCKED` for a hard platform rule. Re-verify before shipping into a client.
+
 ## Budgets and formats
 
 | Surface | Ceiling |
