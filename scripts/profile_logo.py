@@ -441,6 +441,64 @@ def symmetry_scores(points) -> dict:
 # Vector profiling
 # --------------------------------------------------------------------------
 
+# Common CSS named colours, so a palette built from declared paints does not
+# silently drop the ones a brand actually uses. Anything outside this table is
+# reported rather than guessed at.
+_NAMED_COLOURS = {
+    "black": "#000000", "white": "#ffffff", "red": "#ff0000", "green": "#008000",
+    "blue": "#0000ff", "yellow": "#ffff00", "orange": "#ffa500", "purple": "#800080",
+    "pink": "#ffc0cb", "gray": "#808080", "grey": "#808080", "silver": "#c0c0c0",
+    "maroon": "#800000", "olive": "#808000", "lime": "#00ff00", "aqua": "#00ffff",
+    "cyan": "#00ffff", "teal": "#008080", "navy": "#000080", "fuchsia": "#ff00ff",
+    "magenta": "#ff00ff", "gold": "#ffd700", "coral": "#ff7f50", "crimson": "#dc143c",
+    "ivory": "#fffff0", "khaki": "#f0e68c", "lavender": "#e6e6fa", "plum": "#dda0dd",
+    "salmon": "#fa8072", "tan": "#d2b48c", "tomato": "#ff6347", "turquoise": "#40e0d0",
+    "violet": "#ee82ee", "beige": "#f5f5dc", "brown": "#a52a2a", "indigo": "#4b0082",
+    "lightgray": "#d3d3d3", "lightgrey": "#d3d3d3", "darkgray": "#a9a9a9",
+    "darkgrey": "#a9a9a9", "dimgray": "#696969", "dimgrey": "#696969",
+    "whitesmoke": "#f5f5f5", "ghostwhite": "#f8f8ff", "midnightblue": "#191970",
+    "royalblue": "#4169e1", "steelblue": "#4682b4", "slategray": "#708090",
+    "slategrey": "#708090", "forestgreen": "#228b22", "seagreen": "#2e8b57",
+    "skyblue": "#87ceeb", "lightblue": "#add8e6", "darkblue": "#00008b",
+    "darkgreen": "#006400", "darkred": "#8b0000", "orangered": "#ff4500",
+    "goldenrod": "#daa520", "hotpink": "#ff69b4", "deeppink": "#ff1493",
+    "rebeccapurple": "#663399",
+}
+_RGB_FN = re.compile(r"^rgba?\(\s*([\d.]+)[\s,]+([\d.]+)[\s,]+([\d.]+)")
+
+
+def normalise_paint(value: object) -> str | None:
+    """Return a `#rrggbb` hex for a declared paint, or None when it is not a
+    flat colour.
+
+    Gradients, patterns, `none`, `currentColor`, and `transparent` are all None
+    by design: they are not colours a viewer can be given as a brand value. An
+    unrecognised paint returns None too, and the caller records it rather than
+    guessing.
+    """
+    if value is None:
+        return None
+    text = str(value).strip()
+    if not text or text.lower() in {"none", "currentcolor", "transparent", "inherit"}:
+        return None
+    if text.startswith("url(") or "gradient(" in text:
+        return None
+    if text.startswith("#"):
+        digits = text[1:]
+        if len(digits) == 3 and all(c in "0123456789abcdefABCDEF" for c in digits):
+            return "#" + "".join(c * 2 for c in digits).lower()
+        if len(digits) == 6 and all(c in "0123456789abcdefABCDEF" for c in digits):
+            return "#" + digits.lower()
+        if len(digits) == 8 and all(c in "0123456789abcdefABCDEF" for c in digits):
+            return "#" + digits[:6].lower()
+        return None
+    match = _RGB_FN.match(text)
+    if match:
+        channels = [max(0, min(255, int(round(float(c))))) for c in match.groups()]
+        return "#{:02x}{:02x}{:02x}".format(*channels)
+    return _NAMED_COLOURS.get(text.lower())
+
+
 def _local(tag: str) -> str:
     return tag.split("}")[-1] if "}" in tag else tag
 
@@ -483,6 +541,18 @@ def profile_svg(path: Path) -> dict:
     stroke_widths: list[float] = []
     line_caps: dict[str, int] = {}
     fills = 0
+    palette_counts: dict[str, int] = {}
+    palette_unresolved: list[str] = []
+
+    def note_paint(value: object) -> None:
+        hex_value = normalise_paint(value)
+        if hex_value:
+            palette_counts[hex_value] = palette_counts.get(hex_value, 0) + 1
+        elif value is not None and str(value).strip() not in {
+                "", "none", "None", "currentColor", "transparent", "inherit"}:
+            text = str(value).strip()
+            if text not in palette_unresolved and len(palette_unresolved) < 8:
+                palette_unresolved.append(text)
     stroke_present = False
     text_nodes = 0
     gradient_count = 0
@@ -508,6 +578,7 @@ def profile_svg(path: Path) -> dict:
     def walk(element, depth: int, inherited: dict):
         nonlocal stroke_present, fills, text_nodes, gradient_count, filter_count
         nonlocal mask_count, clip_count, use_count, group_depth_max
+        nonlocal palette_counts, palette_unresolved
         nonlocal translate_only_groups, dash_present, named_parts
         tag = _local(element.tag)
         census[tag] = census.get(tag, 0) + 1
@@ -515,6 +586,11 @@ def profile_svg(path: Path) -> dict:
             return
         if tag in {"linearGradient", "radialGradient", "pattern"}:
             gradient_count += 1
+            for child in element.iter():
+                if _local(child.tag) == "stop":
+                    stop = child.get("stop-color") or child.get("color")
+                    if stop:
+                        note_paint(stop)
             return
         if tag == "filter":
             filter_count += 1
@@ -543,10 +619,12 @@ def profile_svg(path: Path) -> dict:
         style = _inherited_fill_rules(element, inherited)
         if _is_paint(style.get("fill")):
             fills += 1
+            note_paint(style.get("fill"))
             fill_rules[style.get("fill-rule", "nonzero")] = \
                 fill_rules.get(style.get("fill-rule", "nonzero"), 0) + 1
         if _is_paint(style.get("stroke")):
             stroke_present = True
+            note_paint(style.get("stroke"))
             try:
                 stroke_widths.append(float(re.sub(r"[a-z%]+$", "", str(style.get("stroke-width", "1")))))
             except ValueError:
@@ -735,7 +813,11 @@ def profile_svg(path: Path) -> dict:
         "filter_count": filter_count,
         "mask_count": mask_count,
         "clip_count": clip_count,
-        "color_count": 1 + gradient_count,
+        "color_count": max(1, len(palette_counts)) + gradient_count,
+        "palette": [{"hex": key, "hits": palette_counts[key]}
+                    for key in sorted(palette_counts, key=lambda k: (-palette_counts[k], k))][:24],
+        "palette_basis": "declared paints, counted by occurrence, not by covered area",
+        "palette_unresolved": palette_unresolved,
         "group_depth_max": group_depth_max,
         "translate_only_groups": translate_only_groups,
         "use_count": use_count,
@@ -941,6 +1023,9 @@ def profile_raster(path: Path) -> dict:
     profile["aspect"] = round(max(width, height) / max(min(width, height), 1), 3)
     profile["aspect_signed"] = round((width - height) / diagonal, 3)
 
+    profile["palette_basis"] = "ink pixels, quantised to 4 bits per channel and weighted by area"
+    profile["palette"] = []
+    profile["palette_unresolved"] = []
     colors = rgba[..., :3][ink]
     if colors.size:
         quantized = (colors // 32).astype(np.int32)
@@ -950,6 +1035,30 @@ def profile_raster(path: Path) -> dict:
         shares = counts[counts > 0] / counts.sum()
         profile["flat"] = bool(profile["color_count"] <= 3)
         profile["color_entropy"] = round(float(-(shares * np.log2(shares)).sum() / math.log2(len(shares) + 1)), 4)
+
+        # Dominant colours: mean colour of each quantisation bucket, ranked by
+        # the area it covers. A share below 0.005 is below the pixel floor that
+        # survives a 4-bit quantisation on any real source, so it is dropped
+        # rather than reported as a brand value.
+        order = np.argsort(counts)[::-1]
+        total = float(counts.sum())
+        palette: list[dict] = []
+        for bucket in order:
+            if counts[bucket] <= 0:
+                continue
+            share = float(counts[bucket]) / total
+            if share < 0.005 and len(palette) >= 1:
+                break
+            members = packed.ravel() == bucket
+            mean = colors[members].mean(axis=0)
+            palette.append({
+                "hex": "#{:02x}{:02x}{:02x}".format(
+                    *(int(round(float(v))) for v in mean)),
+                "share": round(share, 4),
+            })
+            if len(palette) >= 8:
+                break
+        profile["palette"] = palette
 
     # Hole detection by flooding the background from the frame edge.
     padded = np.pad(ink, 1, constant_values=False)

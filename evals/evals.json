@@ -193,6 +193,22 @@
         "The response requires the model, version, prompt, and seed to be recorded as part of the asset.",
         "The response flags letterform mutation and counter filling as the failures that cannot be controlled, rather than implying better prompting fixes them."
       ]
+    },
+    {
+      "id": 14,
+      "prompt": "Here is our logo SVG and a teammate said the animation we shipped 'feels cheap' and asked us to try particles instead. The logo is premium and we're a heritage brand. What do we change?",
+      "expected_output": "The agent restates the comment as a named symptom before touching a value, refuses to jump to particles as a substitute for diagnosing the cause, profiles the source with the correct register, applies the taste veto rather than the raw score, changes one lever, and reports the previous and new values with units.",
+      "files": [
+        "evals/files/layered-mark.svg"
+      ],
+      "assertions": [
+        "The agent restates 'feels cheap' as a named symptom from the review vocabulary before changing any parameter.",
+        "The agent does not adopt particles as the fix, because a technique change is not a revision.",
+        "The agent runs the profiler with an explicit register rather than profiling blind.",
+        "The agent drops a register-vetoed technique from the ranking rather than demoting it.",
+        "The agent changes exactly one lever and states its previous and new values with units.",
+        "The agent reports any impossible request as a conflict rather than widening a documented ceiling."
+      ]
     }
   ]
 }

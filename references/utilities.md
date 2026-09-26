@@ -35,7 +35,7 @@ python scripts/profile_logo.py path/to/logo.svg --register heritage --draw-plan
 python scripts/profile_logo.py path/to/logo.svg --register premium --json
 ```
 
-Reports the structural fingerprint, the capability rung, ranked techniques, gated techniques with their gate codes, the taste budget, and the register's vetoes. `--register` is required and the script exits 2 without it, because taste is a judgement about the brand and not a property of the file.
+Reports the structural fingerprint, the capability rung, ranked techniques, gated techniques with their gate codes, the taste budget, the register's vetoes, and the brand palette. `--register` is required and the script exits 2 without it, because taste is a judgement about the brand and not a property of the file.
 
 | Flag | Effect |
 |---|---|
@@ -47,6 +47,21 @@ Reports the structural fingerprint, the capability rung, ranked techniques, gate
 | `--self-test` | Dependency-free smoke test. Needs no Pillow, NumPy, or SciPy. |
 
 A recommendation is `inferred` on a vector source and `provisional` on a flattened raster, and never `observed`. The script does not read PDF, EPS, or AI sources.
+
+### Palette
+
+Every profile carries `palette`, `palette_basis`, and `palette_unresolved`, because several delivery files ask for a check on the brand colour and that value has to come from somewhere. Never quote a brand colour from memory or from a visual estimate of the source.
+
+| Source | `palette` shape | `palette_basis` |
+|---|---|---|
+| SVG | `{hex, hits}` ranked by declared occurrence | declared paints, counted by occurrence, not by covered area |
+| Raster | `{hex, share}` ranked by area, share 0–1 | ink pixels, quantised to 4 bits per channel and weighted by area |
+
+On a vector source a paint that is a gradient, a pattern, `none`, `currentColor`, or `transparent` is not a colour and is not reported as one. Any declared paint the normaliser could not resolve lands in `palette_unresolved` rather than being guessed at; empty on a clean source, and a non-empty list means the palette is partial.
+
+The SVG figure counts *occurrences of a declared paint*, not the area it covers, so a small accent and a large fill can rank alike. Treat it as a list of the brand's colours, not as a dominant-colour analysis. Use the raster share only on a flattened source, where area is measurable.
+
+A `palette` with one entry and `color_count` of 1 means the source is single-colour; the gradient sweep family is gated off, and multi-stop or two-tone concepts need a source that actually carries those colours.
 
 ## Manifest validation
 

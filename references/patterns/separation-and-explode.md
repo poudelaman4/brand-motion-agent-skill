@@ -197,7 +197,7 @@ Make the return leg the exact reverse of the outbound leg, easing inverted, no r
 - Confirm bounds, centroid, and z-order for every part.
 - Verify no unapproved occlusion at 25%, 50%, 75%, and 100%.
 - Compare the reassembled poster frame to the master.
-- Inspect seams on white, black, checkerboard, and brand color.
+- Inspect seams on white, black, checkerboard, and the brand colour taken from the profiled `palette`.
 - Measure render time and memory near the 12-part ceiling.
 - Confirm the reduced-motion asset is a static final frame.
 

@@ -86,7 +86,7 @@ Treat this as a starting frame contract, not a law. Adjust to the actual source 
 
 - Compare final composite to the approved master.
 - Check each leaf root, overlap, and z-order at 25%, 50%, 75%, and 100%.
-- Inspect on white, black, checkerboard, and a saturated brand color.
+- Inspect on white, black, checkerboard, and a saturated brand colour taken from the profiled `palette`.
 - Review at 32, 64, 128 px, and actual delivery size.
 - Confirm no temporary guide, blur, or opacity remains in the final hold.
 - Confirm the reduced-motion version is immediately recognizable.

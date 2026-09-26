@@ -67,7 +67,8 @@ Connected components are evidence, not layers. `references/patterns/feasibility.
 10. **Build:** use approved source geometry. Extract or request layers once, store tight crops with bounds, and animate transforms/opacity around semantic pivots. Do not segment per frame. Carry each technique in its own channel: dash arithmetic for a draw-on, a direction and depth for a separation, matched path pairs for a morph, a mask type and angle for a wipe. For any extracted raster crossfade, inspect the layer alone and render the exact transition midpoint before accepting it.
 11. **Render variants:** derive outputs from the canonical spec using separate compositions or state definitions as needed.
 12. **QA:** render exact checkpoint frames, inspect the decoded video, compare the final state to the reference, and test target players/backgrounds. For opacity crossfades, inspect direct start/mid/end stills and decode the same frames from the final file. Read `references/qa/qa-checklist.md` and `references/utilities.md` for the checkpoint-sheet and final-frame commands.
-13. **Package:** deliver the source, final motion, static poster, required variants, manifest, render commands, and a pass/warn/blocked report.
+13. **Revise:** on reviewer feedback, restate it as a named symptom before changing any value, change one lever, and re-render the same checkpoints. A comment that needs a canonical invariant, the register, the source, or the delivery context to move is a new brief rather than a revision, and an impossible request is reported as a conflict rather than satisfied by widening a ceiling. Read `references/taste/revision-and-feedback.md`.
+14. **Package:** deliver the source, final motion, static poster, required variants, manifest, render commands, and a pass/warn/blocked report.
 
 ## Hard blockers and provisional defaults
 
@@ -91,6 +92,7 @@ Read only the references the current task needs.
 
 Start here:
 
+- Worked example, one logo through every step: `references/worked-example.md`
 - Classification and selection: `references/taxonomy.md`
 - Detection and recommendation: `references/technique-selection.md`
 - Feasibility by source type: `references/patterns/feasibility.md`
@@ -123,6 +125,7 @@ Taste, before choosing or reviewing:
 - Cliché, machine defaults, restraint: `references/taste/cliche-and-restraint.md`
 - Quality tests, review vocabulary: `references/taste/quality-tests.md`
 - Fit decisions, precedence, refusals: `references/taste/fit-decisions.md`
+- Revision, feedback, and what a revision may not touch: `references/taste/revision-and-feedback.md`
 
 By context:
 

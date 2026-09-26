@@ -18,6 +18,7 @@ Exit code 0 on success, 1 when any check fails.
 """
 from __future__ import annotations
 
+import ast
 import json
 import re
 import subprocess
@@ -345,6 +346,147 @@ def check_environment_probe() -> None:
          f"{len(document.get('modes', []))} task modes.")
 
 
+def check_pipeline_integration() -> None:
+    """Run a real logo through the pipeline and assert the documented outcome.
+
+    Every other check tests one piece. This is the only one that tests whether
+    they compose: profile, rank, taste, and re-read. It pins the behaviours
+    `references/worked-example.md` documents, so the example cannot drift into
+    describing something the scripts no longer do.
+    """
+    fixture = ROOT / "evals" / "files" / "layered-mark.svg"
+    if not fixture.exists():
+        fail("evals/files/layered-mark.svg is missing; the worked example has no source.")
+        return
+    result = subprocess.run(
+        [sys.executable, str(ROOT / "scripts" / "profile_logo.py"), str(fixture),
+         "--register", "premium", "--frequency", "occasional", "--draw-plan"],
+        capture_output=True, text=True)
+    if result.returncode != 0:
+        fail(f"pipeline profiling run failed: {result.stderr.strip()}")
+        return
+    try:
+        document = json.loads(result.stdout)
+    except json.JSONDecodeError as exc:
+        fail(f"pipeline run did not emit valid JSON: {exc}")
+        return
+
+    profile = document.get("profile", {})
+    recommendation = document.get("recommendation", {})
+    taste = recommendation.get("taste", {}) or {}
+
+    # The example's central claim: the register vetoes the highest raw score.
+    permitted = taste.get("permitted") or []
+    vetoed = [item.get("technique") for item in taste.get("vetoed") or []]
+    if "separation_explode" not in vetoed:
+        fail("taste gate did not veto separation_explode for the premium register; "
+             "the worked example describes a gate that no longer fires.")
+    if "separation_explode" in permitted:
+        fail("a vetoed technique is still listed as permitted; a veto must remove "
+             "rather than demote.")
+    primary = (recommendation.get("primary") or {}).get("technique")
+    if primary != "mask_wipe":
+        fail(f"expected mask_wipe as primary after the veto, got {primary!r}.")
+
+    # Live text must gate all three families the example names.
+    blocked = {item.get("technique") for item in recommendation.get("blocked") or []}
+    for technique in ("kinetic_typography", "line_draw_on", "multi_stroke_trace"):
+        if technique not in blocked:
+            fail(f"{technique} is no longer gated by live text; gate code LIVE_TEXT "
+                 "should block it, and the worked example says so.")
+
+    # Budgets are ceilings, and the palette is the brand colour source.
+    budget = taste.get("budget") or {}
+    if budget.get("duration_ceiling_s") != 0.96:
+        fail(f"premium x occasional duration ceiling changed to "
+             f"{budget.get('duration_ceiling_s')!r}; the worked example quotes 0.96 s.")
+    if budget.get("overshoot_ceiling") != 0.0:
+        fail("the premium register no longer enforces zero overshoot.")
+    palette = profile.get("palette") or []
+    if not palette or not str(palette[0].get("hex", "")).startswith("#"):
+        fail("the profile no longer reports a palette, so the delivery files that "
+             "ask for the brand colour have no source for it.")
+
+    note("pipeline integration: profile, rank, taste veto, live-text gating, and "
+         "palette all agree with references/worked-example.md.")
+
+
+def _pull_brace_object(source: str, name: str):
+    """Return the first `{...}` literal assigned to `name`, as a dict."""
+    match = re.search(rf"{name}\s*[:=]\s*", source)
+    if not match:
+        return None
+    start = source.index("{", match.end())
+    depth = 0
+    for index in range(start, len(source)):
+        if source[index] == "{":
+            depth += 1
+        elif source[index] == "}":
+            depth -= 1
+            if depth == 0:
+                try:
+                    return ast.literal_eval(re.sub(r"#.*", "", source[start:index + 1]))
+                except (ValueError, SyntaxError):
+                    return None
+    return None
+
+
+def check_taste_tables_agree() -> None:
+    """The taste ceilings live in three places; assert they are the same numbers.
+
+    The profiler has its own register and frequency tables, the manifest
+    validator has a second copy it uses to reject a hand-edited budget, and
+    `assets/motion-tokens.json` is the documented source of both. Nothing else
+    keeps them aligned. If they drift, the profiler emits a budget the validator
+    refuses, and a correct workflow deadlocks on a number nobody chose.
+
+    This is the check that would have caught it.
+    """
+    try:
+        tokens = json.loads((ROOT / "assets" / "motion-tokens.json").read_text())
+    except (OSError, json.JSONDecodeError) as exc:
+        fail(f"assets/motion-tokens.json could not be read: {exc}")
+        return
+    profiler = (ROOT / "scripts" / "profile_logo.py").read_text()
+    validator = (ROOT / "scripts" / "validate_motion_spec.py").read_text()
+
+    profiler_registers = _pull_brace_object(profiler, "REGISTERS") or {}
+    validator_registers = _pull_brace_object(validator, "REGISTER_BUDGET_CEILINGS") or {}
+    profiler_frequencies = _pull_brace_object(profiler, "FREQUENCIES") or {}
+    validator_frequencies = _pull_brace_object(validator, "FREQUENCY_FACTORS") or {}
+    token_registers = tokens.get("registers", {})
+    token_frequencies = tokens.get("frequencies", {})
+
+    reg_keys = ("max_duration_s", "max_gestures", "max_overshoot")
+    for name, spec in token_registers.items():
+        expected = tuple(spec.get(key) for key in reg_keys)
+        seen = {
+            "profiler": tuple((profiler_registers.get(name) or {}).get(key) for key in reg_keys),
+            "validator": tuple(validator_registers.get(name)),
+            "tokens": expected,
+        }
+        if len(set(seen.values())) != 1:
+            fail(f"register '{name}' disagrees across copies: "
+                 + "; ".join(f"{k}={v}" for k, v in seen.items()))
+    for name in set(profiler_registers) | set(validator_registers):
+        if name not in token_registers:
+            fail(f"register '{name}' exists in a script table but not in motion-tokens.json.")
+
+    freq_keys = ("duration_factor", "gesture_factor", "overshoot_factor")
+    for name, spec in token_frequencies.items():
+        p = profiler_frequencies.get(name)
+        v = validator_frequencies.get(name)
+        pv = tuple(p.get(key) for key in freq_keys) if isinstance(p, dict) else tuple(p or ())
+        vv = tuple(v.get(key) for key in freq_keys) if isinstance(v, dict) else tuple(v or ())
+        tv = tuple(spec.get(key) for key in freq_keys)
+        if len({pv, vv, tv}) != 1:
+            fail(f"frequency '{name}' disagrees across copies: "
+                 f"profiler={pv} validator={vv} tokens={tv}")
+
+    note(f"taste tables agree across profiler, validator, and motion-tokens.json "
+         f"({len(token_registers)} registers, {len(token_frequencies)} frequencies).")
+
+
 def check_profiler() -> None:
     script = ROOT / "scripts" / "profile_logo.py"
     fixture = ROOT / "evals" / "files" / "layered-mark.svg"
@@ -394,6 +536,8 @@ def main() -> int:
     check_profiler()
     check_volatile_figures()
     check_environment_probe()
+    check_pipeline_integration()
+    check_taste_tables_agree()
 
     for message in NOTES:
         print(f"note: {message}")

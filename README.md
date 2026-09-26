@@ -66,6 +66,7 @@ brand-motion-agent-skill/
 │   ├── compare_final_frame.py       # Encoded final-state comparison
 │   └── check_skill.py               # Dependency-free self-check of this package
 ├── references/
+│   ├── worked-example.md           # One logo through the whole pipeline, real tool output
 │   ├── technique-selection.md       # Detection algorithm, gates, and ranking
 │   ├── utilities.md                 # Script invocations, flags, and limits
 │   ├── setup-and-environment.md     # Renderer ladder, per-mode needs, device notes
@@ -76,6 +77,9 @@ brand-motion-agent-skill/
 │   │   ├── idle-and-ambient.md      # Rest state, breathing, orbit, scrub
 │   │   └── matter-and-particles.md  # Particles, dissolve, turbulence, halftone
 │   ├── contexts/                    # Education/LMS, premium, playful, tech, wellness
+│   ├── taste/                       # Register vetoes, clichés, quality tests, revision
+│   │   ├── revision-and-feedback.md # Translating a review comment into one change
+│   │   └── brand-register.md        # The eleven registers and what each vetoes
 │   ├── delivery/                    # Backgrounds, alpha, codecs, accessibility
 │   ├── implementation/              # Remotion, vector/Lottie, AE, flattened raster
 │   │   └── advanced-mechanics.md    # Draw-on, separation, morph, and sweep mechanics

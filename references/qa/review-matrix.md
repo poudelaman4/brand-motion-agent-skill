@@ -13,7 +13,7 @@
 |---|---|
 | Timeline | exact frame 0, early checkpoint, midpoint, late checkpoint, settle frame, poster frame, and one frame before settle |
 | Scale | 16, 32, 64, 128 px, and actual delivery size |
-| Background | white, near-white, black, checkerboard, brand color, photography |
+| Background | white, near-white, black, checkerboard, brand colour, photography. Take the brand colour from the profiled `palette`, never from an estimate. |
 | Format | source, decoded encoded output, target player/editor |
 | Typography | exact glyphs, kerning, counters, baseline, reading direction |
 | Layer integrity | each layer alone and full composite |
